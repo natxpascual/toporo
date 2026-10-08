@@ -1,0 +1,17 @@
+{
+  "name": "00_capstone",
+  "version": "1.0.0",
+  "description": "> **An AI-Powered Terraform Visualizer, Checkov Policy Guardrail, and FinOps Copilot for Microsoft Azure**",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^26.4.0"
+  }
+}

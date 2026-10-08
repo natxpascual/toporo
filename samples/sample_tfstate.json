@@ -1,0 +1,61 @@
+{
+  "version": 4,
+  "terraform_version": "1.8.0",
+  "serial": 12,
+  "lineage": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "resources": [
+    {
+      "mode": "managed",
+      "type": "azurerm_resource_group",
+      "name": "rg_imported",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-imported-state",
+            "location": "eastus",
+            "name": "rg-imported-state",
+            "tags": { "Environment": "StateImport" }
+          }
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "azurerm_virtual_network",
+      "name": "vnet_imported",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-imported-state/providers/Microsoft.Network/virtualNetworks/vnet-imported",
+            "location": "eastus",
+            "name": "vnet-imported",
+            "resource_group_name": "rg-imported-state",
+            "address_space": ["10.50.0.0/16"]
+          }
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "azurerm_subnet",
+      "name": "snet_imported",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-imported-state/providers/Microsoft.Network/virtualNetworks/vnet-imported/subnets/snet-data",
+            "name": "snet-data",
+            "resource_group_name": "rg-imported-state",
+            "virtual_network_name": "vnet-imported",
+            "address_prefixes": ["10.50.1.0/24"]
+          }
+        }
+      ]
+    }
+  ]
+}
