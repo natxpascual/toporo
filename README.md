@@ -40,6 +40,26 @@ The **Azure Cloud Topology Engine** is a high-performance visual cloud managemen
 - **npm**: 11+
 
 ### 1. Backend Microservice Setup
+
+<details open>
+<summary><b>PowerShell (Windows)</b></summary>
+
+```powershell
+# Create and activate virtual environment
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+# Install dependencies
+pip install -e .
+
+# Run FastAPI server
+python -m src.main --host 0.0.0.0 --port 8000 --reload
+```
+</details>
+
+<details>
+<summary><b>Bash (Linux / macOS)</b></summary>
+
 ```bash
 # Create and activate virtual environment
 python3 -m venv .venv
@@ -51,6 +71,8 @@ pip install -e .
 # Run FastAPI server
 python -m src.main --host 0.0.0.0 --port 8000 --reload
 ```
+</details>
+
 API Documentation and Swagger UI will be available at: `http://localhost:8000/docs`
 
 ### 2. Frontend Visual Studio Setup
@@ -64,8 +86,17 @@ Open `http://localhost:3000` (or `http://localhost:5173`) in your browser to lau
 ---
 
 ## 🧪 Running Automated Tests
+
+**PowerShell (Windows):**
+```powershell
+$env:PYTHONPATH="."
+.\.venv\Scripts\pytest -v tests/
+# Or directly:
+python -m pytest -v tests/
+```
+
+**Bash (Linux / macOS):**
 ```bash
-# Run pytest test suite
 PYTHONPATH=. .venv/bin/pytest -v tests/
 ```
 

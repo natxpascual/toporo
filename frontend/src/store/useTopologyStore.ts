@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { CanonicalTopologyIR, AzureResourceIR, TopologyEdgeIR, CatalogItem, ApiService } from '../services/api';
+import { ARCHITECTURE_TEMPLATES } from '../data/architectureTemplates';
 
 export type GridMode = 'grid' | 'dotted' | 'hidden';
 
@@ -28,12 +29,16 @@ interface TopologyStore {
   showGrid: boolean;
   showMiniMap: boolean;
   snapToGrid: boolean;
+  isSaved: boolean;
   viewMode: 'detailed' | 'simple';
 
   // Actions
   fetchCatalog: () => Promise<void>;
   setTopology: (topology: CanonicalTopologyIR) => void;
   loadTemplate: (templateTopology: CanonicalTopologyIR) => Promise<void>;
+  resetProject: () => void;
+  clearCanvas: () => void;
+  markSaved: (saved?: boolean) => void;
   setViewMode: (mode: 'detailed' | 'simple') => void;
   toggleViewMode: () => void;
   selectResource: (id: string | null) => void;
@@ -76,6 +81,8 @@ interface TopologyStore {
   refreshCodeAndAnalysis: () => Promise<void>;
   syncFromHcl: (hcl: string) => Promise<void>;
   importFromHcl: (hcl: string) => Promise<void>;
+  importFromState: (stateJson: string, projectName?: string) => Promise<void>;
+  importFromAzure: (queryResultsJson: string, subscriptionId?: string) => Promise<void>;
   runAutoLayout: () => Promise<void>;
   applyRemediation: (finding: any) => Promise<void>;
   generateArchitecture: (prompt: string) => Promise<{ topology: CanonicalTopologyIR }>;
@@ -86,7 +93,7 @@ interface TopologyStore {
 const DEFAULT_TOPOLOGY: CanonicalTopologyIR = {
   version: '1.0.0',
   metadata: {
-    project_name: 'Azure Cloud Architecture',
+    project_name: 'Untitled Project',
     target_cloud: 'Azure',
     iac_format: 'Terraform',
     default_location: 'eastus',
@@ -127,14 +134,14 @@ const getInitialGridMode = (): GridMode => {
 
 const getInitialShowMiniMap = (): boolean => {
   const saved = localStorage.getItem('azure_show_minimap');
-  return saved !== null ? saved === 'true' : true;
+  return saved !== null ? saved === 'true' : false;
 };
 
 const getInitialViewMode = (): 'detailed' | 'simple' => {
-  if (typeof window === 'undefined') return 'detailed';
+  if (typeof window === 'undefined') return 'simple';
   const saved = localStorage.getItem('azure_canvas_view_mode');
   if (saved === 'detailed' || saved === 'simple') return saved;
-  return 'detailed';
+  return 'simple';
 };
 
 const initialTheme = getInitialTheme();
@@ -166,7 +173,56 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
   showGrid: initialGridMode !== 'hidden',
   showMiniMap: getInitialShowMiniMap(),
   snapToGrid: false,
+  isSaved: false,
   viewMode: getInitialViewMode(),
+
+  markSaved: (saved = true) => set({ isSaved: saved }),
+
+  resetProject: () => {
+    const empty: CanonicalTopologyIR = {
+      version: '1.0.0',
+      metadata: {
+        project_name: 'Untitled Project',
+        target_cloud: 'Azure',
+        iac_format: 'Terraform',
+        default_location: 'eastus',
+        version: '1.0.0',
+      },
+      resources: [],
+      edges: [],
+    };
+    const state = get();
+    const newHistory = [...state.history, JSON.parse(JSON.stringify(state.topology))].slice(-25);
+    set({
+      topology: empty,
+      history: newHistory,
+      future: [],
+      selectedResourceId: null,
+      hoveredResourceId: null,
+      isSaved: false,
+    });
+    get().refreshCodeAndAnalysis();
+  },
+
+  clearCanvas: () => {
+    const state = get();
+    if (state.topology.resources.length === 0) return;
+    const cleared: CanonicalTopologyIR = {
+      ...state.topology,
+      resources: [],
+      edges: [],
+    };
+    const newHistory = [...state.history, JSON.parse(JSON.stringify(state.topology))].slice(-25);
+    set({
+      topology: cleared,
+      history: newHistory,
+      future: [],
+      selectedResourceId: null,
+      hoveredResourceId: null,
+      isSaved: false,
+    });
+    get().refreshCodeAndAnalysis();
+  },
 
   setViewMode: (mode: 'detailed' | 'simple') => {
     localStorage.setItem('azure_canvas_view_mode', mode);
@@ -181,13 +237,15 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
 
   loadTemplate: async (templateTopology: CanonicalTopologyIR) => {
     const state = get();
+    const cloned = JSON.parse(JSON.stringify(templateTopology));
     const newHistory = [...state.history, JSON.parse(JSON.stringify(state.topology))].slice(-25);
     set({
-      topology: templateTopology,
+      topology: cloned,
       history: newHistory,
       future: [],
       selectedResourceId: null,
       hoveredResourceId: null,
+      isSaved: false,
     });
     await get().refreshCodeAndAnalysis();
   },
@@ -204,15 +262,13 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
   setTopology: (topology) => {
     const state = get();
     const newHistory = [...state.history, JSON.parse(JSON.stringify(state.topology))].slice(-25);
-    set({ topology, history: newHistory, future: [] });
+    set({ topology, history: newHistory, future: [], isSaved: false });
     get().refreshCodeAndAnalysis();
   },
 
-  selectResource: (id) => set((state) => ({
+  selectResource: (id) => set({
     selectedResourceId: id,
-    // Auto-hide unpinned inspector drawer when selection is cleared
-    isInspectorOpen: id ? state.isInspectorOpen : (state.isInspectorPinned ? state.isInspectorOpen : false),
-  })),
+  }),
   setHoveredResource: (id) => set({ hoveredResourceId: id }),
   setActiveCodeFile: (filename) => set({ activeCodeFile: filename }),
   setActiveTab: (tab) => set({ activeTab: tab }),
@@ -230,8 +286,15 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
       });
     }
   },
-  closeInspector: () => set({ isInspectorOpen: false }),
-  toggleInspector: (open) => set((state) => ({ isInspectorOpen: open !== undefined ? open : !state.isInspectorOpen })),
+  closeInspector: () => set({ isInspectorOpen: false, isInspectorPinned: false }),
+  toggleInspector: (open) => set((state) => {
+    const currentlyVisible = state.isInspectorOpen || state.isInspectorPinned;
+    const nextOpen = open !== undefined ? open : !currentlyVisible;
+    return {
+      isInspectorOpen: nextOpen,
+      isInspectorPinned: nextOpen ? state.isInspectorPinned : false,
+    };
+  }),
   toggleInspectorPin: (pinned) => set((state) => {
     const nextPinned = pinned !== undefined ? pinned : !state.isInspectorPinned;
     return { isInspectorPinned: nextPinned, isInspectorOpen: true };
@@ -250,6 +313,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
 
   renameProject: (name) => set((state) => ({
     topology: { ...state.topology, metadata: { ...state.topology.metadata, project_name: name } },
+    isSaved: false,
   })),
 
   setGridMode: (mode) => {
@@ -287,7 +351,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
     const prev = state.history[state.history.length - 1];
     const newHistory = state.history.slice(0, -1);
     const newFuture = [JSON.parse(JSON.stringify(state.topology)), ...state.future];
-    set({ topology: prev, history: newHistory, future: newFuture, selectedResourceId: null });
+    set({ topology: prev, history: newHistory, future: newFuture, selectedResourceId: null, isSaved: false });
     get().refreshCodeAndAnalysis();
   },
 
@@ -297,7 +361,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
     const next = state.future[0];
     const newFuture = state.future.slice(1);
     const newHistory = [...state.history, JSON.parse(JSON.stringify(state.topology))];
-    set({ topology: next, history: newHistory, future: newFuture, selectedResourceId: null });
+    set({ topology: next, history: newHistory, future: newFuture, selectedResourceId: null, isSaved: false });
     get().refreshCodeAndAnalysis();
   },
 
@@ -327,7 +391,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
       .sort((a, b) => {
         const depth = { subnet: 3, vnet: 2, rg: 1 };
         return (depth[b.container_level as 'subnet' | 'vnet' | 'rg'] || 0) -
-               (depth[a.container_level as 'subnet' | 'vnet' | 'rg'] || 0);
+          (depth[a.container_level as 'subnet' | 'vnet' | 'rg'] || 0);
       });
 
     if (matchingContainers.length === 0) return null;
@@ -368,10 +432,10 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
       dimensions: item.containerLevel === 'rg'
         ? { width: 560, height: 340 }
         : item.containerLevel === 'vnet'
-        ? { width: 480, height: 260 }
-        : item.containerLevel === 'subnet'
-        ? { width: 400, height: 180 }
-        : undefined,
+          ? { width: 480, height: 260 }
+          : item.containerLevel === 'subnet'
+            ? { width: 400, height: 180 }
+            : undefined,
     };
 
     const newEdges = [...state.topology.edges];
@@ -395,7 +459,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
     };
 
     const history = [...state.history, JSON.parse(JSON.stringify(state.topology))].slice(-25);
-    set({ topology: updatedTopology, selectedResourceId: newId, history, future: [] });
+    set({ topology: updatedTopology, selectedResourceId: newId, history, future: [], isSaved: false });
     await get().refreshCodeAndAnalysis();
   },
 
@@ -426,7 +490,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
       });
     }
 
-    set({ topology: { ...state.topology, resources: updatedResources, edges: updatedEdges } });
+    set({ topology: { ...state.topology, resources: updatedResources, edges: updatedEdges }, isSaved: false });
     await get().refreshCodeAndAnalysis();
   },
 
@@ -452,7 +516,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
       return r;
     });
 
-    set({ topology: { ...state.topology, resources: updatedResources } });
+    set({ topology: { ...state.topology, resources: updatedResources }, isSaved: false });
   },
 
   renameResource: async (id, newName) => {
@@ -467,7 +531,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
       r.id === id ? { ...r, name: trimmed, properties: { ...r.properties, name: trimmed } } : r
     );
     const updatedTopology: CanonicalTopologyIR = { ...state.topology, resources: updatedResources };
-    set({ topology: updatedTopology, history, future: [] });
+    set({ topology: updatedTopology, history, future: [], isSaved: false });
     await get().refreshCodeAndAnalysis();
   },
 
@@ -477,7 +541,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
       r.id === id ? { ...r, properties: { ...r.properties, ...properties } } : r
     );
     const updatedTopology = { ...state.topology, resources: updatedResources };
-    set({ topology: updatedTopology });
+    set({ topology: updatedTopology, isSaved: false });
     await get().refreshCodeAndAnalysis();
   },
 
@@ -486,7 +550,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
     const updatedResources = state.topology.resources.map((r) =>
       r.id === id ? { ...r, position } : r
     );
-    set({ topology: { ...state.topology, resources: updatedResources } });
+    set({ topology: { ...state.topology, resources: updatedResources }, isSaved: false });
   },
 
   updateResourceDimensions: (id, dimensions) => {
@@ -494,7 +558,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
     const updatedResources = state.topology.resources.map((r) =>
       r.id === id ? { ...r, dimensions } : r
     );
-    set({ topology: { ...state.topology, resources: updatedResources } });
+    set({ topology: { ...state.topology, resources: updatedResources }, isSaved: false });
   },
 
   updateResourceBounds: (id, bounds) => {
@@ -509,7 +573,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
       }
       return r;
     });
-    set({ topology: { ...state.topology, resources: updatedResources } });
+    set({ topology: { ...state.topology, resources: updatedResources }, isSaved: false });
   },
 
   duplicateResource: async (id) => {
@@ -552,6 +616,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
         edges: newEdges,
       },
       selectedResourceId: newId,
+      isSaved: false,
     });
     await get().refreshCodeAndAnalysis();
   },
@@ -584,6 +649,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
       topology: updatedTopology,
       selectedResourceId: isSelected ? null : state.selectedResourceId,
       isInspectorOpen: isSelected && !state.isInspectorPinned ? false : state.isInspectorOpen,
+      isSaved: false,
     });
     await get().refreshCodeAndAnalysis();
   },
@@ -592,7 +658,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
     const state = get();
     const updatedEdges = [...state.topology.edges, edge];
     const updatedTopology = { ...state.topology, edges: updatedEdges };
-    set({ topology: updatedTopology });
+    set({ topology: updatedTopology, isSaved: false });
     await get().refreshCodeAndAnalysis();
   },
 
@@ -600,7 +666,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
     const state = get();
     const updatedEdges = state.topology.edges.filter((e) => e.id !== edgeId);
     const updatedTopology = { ...state.topology, edges: updatedEdges };
-    set({ topology: updatedTopology });
+    set({ topology: updatedTopology, isSaved: false });
     await get().refreshCodeAndAnalysis();
   },
 
@@ -636,7 +702,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
     set({ isSyncing: true });
     try {
       const parsedTopology = await ApiService.parseCode(hcl);
-      set({ topology: parsedTopology, isSyncing: false });
+      set({ topology: parsedTopology, isSyncing: false, isSaved: false });
       await get().refreshCodeAndAnalysis();
     } catch (err) {
       console.error('Failed to sync from HCL:', err);
@@ -657,6 +723,32 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
     }
   },
 
+  importFromState: async (stateJson: string, projectName: string = 'Imported State') => {
+    set({ isSyncing: true });
+    try {
+      const parsedTopology = await ApiService.importState(stateJson, projectName);
+      set({ topology: parsedTopology, isSyncing: false, isImportOpen: false });
+      await get().refreshCodeAndAnalysis();
+    } catch (err) {
+      console.error('Failed to import state:', err);
+      set({ isSyncing: false });
+      throw err;
+    }
+  },
+
+  importFromAzure: async (queryResultsJson: string, subscriptionId: string = 'Live Azure Subscription') => {
+    set({ isSyncing: true });
+    try {
+      const parsedTopology = await ApiService.importAzure(queryResultsJson, subscriptionId);
+      set({ topology: parsedTopology, isSyncing: false, isImportOpen: false });
+      await get().refreshCodeAndAnalysis();
+    } catch (err) {
+      console.error('Failed to import Azure resources:', err);
+      set({ isSyncing: false });
+      throw err;
+    }
+  },
+
   generateArchitecture: async (prompt: string) => {
     set({ isGenerating: true, generatedTopologyPreview: null });
     try {
@@ -672,18 +764,29 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
   applyGeneratedTopology: () => {
     const preview = get().generatedTopologyPreview;
     if (preview) {
-      set({ topology: preview, generatedTopologyPreview: null });
+      set({ topology: preview, generatedTopologyPreview: null, isSaved: false });
       get().refreshCodeAndAnalysis();
     }
   },
 
   loadSample: (id: string) => {
-    // Minimal sample topologies — real ones live in the backend
+    const templateMap: Record<string, string> = {
+      'hub-spoke': 'intermediate-hub-spoke',
+      '3tier-web': 'intermediate-3tier-web',
+      'aks-micro': 'starter-paas-sql',
+      'ai-workload': 'intermediate-ai-rag',
+    };
+    const targetId = templateMap[id] || id;
+    const found = ARCHITECTURE_TEMPLATES.find((t) => t.id === targetId || t.id.includes(id));
+    if (found && found.topology) {
+      get().loadTemplate(JSON.parse(JSON.stringify(found.topology)));
+      return;
+    }
     const SAMPLES: Record<string, Partial<CanonicalTopologyIR>> = {
       'hub-spoke': { metadata: { ...get().topology.metadata, project_name: 'Hub & Spoke Network' } },
       '3tier-web': { metadata: { ...get().topology.metadata, project_name: '3-Tier Web App' } },
-      'aks-micro':  { metadata: { ...get().topology.metadata, project_name: 'AKS Microservices' } },
-      'ai-workload':{ metadata: { ...get().topology.metadata, project_name: 'AI OpenAI Workload' } },
+      'aks-micro': { metadata: { ...get().topology.metadata, project_name: 'AKS Microservices' } },
+      'ai-workload': { metadata: { ...get().topology.metadata, project_name: 'AI OpenAI Workload' } },
     };
     const patch = SAMPLES[id];
     if (patch) set((state) => ({ topology: { ...state.topology, ...patch } }));
@@ -703,7 +806,7 @@ export const useTopologyStore = create<TopologyStore>((set, get) => ({
     const state = get();
     try {
       const remediated = await ApiService.remediateSecurity(state.topology, finding);
-      set({ topology: remediated });
+      set({ topology: remediated, isSaved: false });
       await get().refreshCodeAndAnalysis();
     } catch (err) {
       console.error('Failed to apply remediation:', err);

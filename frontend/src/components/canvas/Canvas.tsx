@@ -13,8 +13,6 @@ import {
   Connection,
   addEdge as flowAddEdge,
   BackgroundVariant,
-  ReactFlowProvider,
-  EdgeLabelRenderer,
   ConnectionMode,
   useReactFlow,
 } from '@xyflow/react';
@@ -23,19 +21,18 @@ import '@xyflow/react/dist/style.css';
 import { useTopologyStore } from '../../store/useTopologyStore';
 import { AzureNode } from './AzureNode';
 import { ContainerNode } from './ContainerNode';
-import { CanvasToolbar } from './CanvasToolbar';
 import { DeletableEdge, getRelationConfig } from './DeletableEdge';
 import { CatalogItem, AzureResourceIR, CanonicalTopologyIR } from '../../services/api';
 
 // ─── Custom Flow Types ───────────────────────────────────────────────────
 
 const nodeTypes: Record<string, React.ComponentType<any>> = {
-  azureResource:      AzureNode,
-  containerResource:  ContainerNode,
+  azureResource: AzureNode,
+  containerResource: ContainerNode,
 };
 
 const edgeTypes: Record<string, React.ComponentType<any>> = {
-  deletableEdge:      DeletableEdge,
+  deletableEdge: DeletableEdge,
 };
 
 // ─── Empty Canvas State ───────────────────────────────────────────────────
@@ -44,16 +41,16 @@ const EmptyState: React.FC<{ onOpenCopilot?: () => void }> = ({ onOpenCopilot })
   <div className="canvas-empty-state animate-fade-in-up">
     <div
       className="w-20 h-20 rounded-[var(--radius-xl)] flex items-center justify-center mb-2"
-      style={{ background: 'rgba(12,102,228,0.08)', border: '1px dashed rgba(12,102,228,0.3)' }}
+      style={{ background: 'var(--color-primary-glow)', border: '1px dashed var(--color-border-active)' }}
     >
       <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10" xmlns="http://www.w3.org/2000/svg">
-        <rect x="8" y="8" width="14" height="14" rx="3" fill="#0C66E4" fillOpacity="0.3" stroke="#0C66E4" strokeOpacity="0.6" strokeWidth="1.5"/>
-        <rect x="26" y="8" width="14" height="14" rx="3" fill="#00A3BF" fillOpacity="0.3" stroke="#00A3BF" strokeOpacity="0.6" strokeWidth="1.5"/>
-        <rect x="8" y="26" width="14" height="14" rx="3" fill="#22A06B" fillOpacity="0.3" stroke="#22A06B" strokeOpacity="0.6" strokeWidth="1.5"/>
-        <rect x="26" y="26" width="14" height="14" rx="3" fill="#E2B203" fillOpacity="0.3" stroke="#E2B203" strokeOpacity="0.6" strokeWidth="1.5"/>
-        <line x1="22" y1="15" x2="26" y2="15" stroke="#0C66E4" strokeOpacity="0.5" strokeWidth="1.5" strokeDasharray="2,2"/>
-        <line x1="15" y1="22" x2="15" y2="26" stroke="#00A3BF" strokeOpacity="0.5" strokeWidth="1.5" strokeDasharray="2,2"/>
-        <line x1="33" y1="22" x2="33" y2="26" stroke="#22A06B" strokeOpacity="0.5" strokeWidth="1.5" strokeDasharray="2,2"/>
+        <rect x="8" y="8" width="14" height="14" rx="3" fill="#1B8A4B" fillOpacity="0.28" stroke="#1B8A4B" strokeOpacity="0.7" strokeWidth="1.5" />
+        <rect x="26" y="8" width="14" height="14" rx="3" fill="#01B39F" fillOpacity="0.28" stroke="#01B39F" strokeOpacity="0.7" strokeWidth="1.5" />
+        <rect x="8" y="26" width="14" height="14" rx="3" fill="#2B5A43" fillOpacity="0.28" stroke="#4BCE97" strokeOpacity="0.7" strokeWidth="1.5" />
+        <rect x="26" y="26" width="14" height="14" rx="3" fill="#D97706" fillOpacity="0.28" stroke="#F5CD47" strokeOpacity="0.7" strokeWidth="1.5" />
+        <line x1="22" y1="15" x2="26" y2="15" stroke="#1B8A4B" strokeOpacity="0.6" strokeWidth="1.5" strokeDasharray="2,2" />
+        <line x1="15" y1="22" x2="15" y2="26" stroke="#01B39F" strokeOpacity="0.6" strokeWidth="1.5" strokeDasharray="2,2" />
+        <line x1="33" y1="22" x2="33" y2="26" stroke="#4BCE97" strokeOpacity="0.6" strokeWidth="1.5" strokeDasharray="2,2" />
       </svg>
     </div>
     <h3>Design your Azure architecture</h3>
@@ -65,10 +62,10 @@ const EmptyState: React.FC<{ onOpenCopilot?: () => void }> = ({ onOpenCopilot })
       {onOpenCopilot && (
         <button
           onClick={onOpenCopilot}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-sm)] text-[12px] font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-colors shadow-xs"
+          className="btn-primary flex items-center gap-2 px-3 py-1.5 text-[12px] font-semibold shadow-xs"
         >
           <span>Open AI Copilot</span>
-          <kbd className="text-[10px] px-1.5 py-0.2 rounded bg-white/20 font-mono">⌘/</kbd>
+          <kbd className="text-[10px] px-1.5 py-0.2 rounded bg-black/15 font-mono">⌘/</kbd>
         </button>
       )}
     </div>
@@ -88,7 +85,6 @@ const CanvasInner: React.FC = () => {
     selectResource,
     setHoveredResource,
     updateResourcePosition,
-    updateResourceDimensions,
     updateResourceParent,
     moveContainerAndChildren,
     findContainingContainer,
@@ -104,6 +100,11 @@ const CanvasInner: React.FC = () => {
   const isLight = themeMode === 'light';
   const reactFlow = useReactFlow();
   const isEmpty = topology.resources.length === 0;
+
+  // Track React Flow's ResizeObserver-measured dimensions so MiniMap and bounds have accurate sizes
+  const [measuredDimensions, setMeasuredDimensions] = React.useState<
+    Record<string, { width: number; height: number }>
+  >({});
 
   // Track drag start positions for delta calculation
   const dragStartPositions = React.useRef<Record<string, { x: number; y: number }>>({});
@@ -165,12 +166,18 @@ const CanvasInner: React.FC = () => {
       const defaultH = res.container_level === 'rg' ? 340 : res.container_level === 'vnet' ? 240 : 180;
       const nodeWidth = res.dimensions?.width ?? (isContainer ? defaultW : undefined);
       const nodeHeight = res.dimensions?.height ?? (isContainer ? defaultH : undefined);
+      const measured = measuredDimensions[res.id] ?? (
+        nodeWidth !== undefined && nodeHeight !== undefined
+          ? { width: nodeWidth, height: nodeHeight }
+          : undefined
+      );
 
       return {
-        id:       res.id,
-        type:     isContainer ? 'containerResource' : 'azureResource',
+        id: res.id,
+        type: isContainer ? 'containerResource' : 'azureResource',
         position: res.position ?? { x: 100, y: 100 },
-        data:     {
+        ...(measured ? { measured } : {}),
+        data: {
           resource: res,
           childCount,
           childrenList: nestedChildren,
@@ -180,11 +187,11 @@ const CanvasInner: React.FC = () => {
           activeFocusId,
         },
         selected: selectedResourceId === res.id,
-        zIndex:   isContainer ? containerZ : 10,
-        style:    isContainer ? { pointerEvents: 'all' as const } : undefined,
+        zIndex: isContainer ? containerZ : 10,
+        style: isContainer ? { pointerEvents: 'all' as const } : undefined,
       };
-    });
-  }, [topology.resources, selectedResourceId, hoveredResourceId, getAncestors, getNestedChildren]);
+    }).sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0));
+  }, [topology.resources, selectedResourceId, hoveredResourceId, measuredDimensions, getAncestors, getNestedChildren]);
 
   const extractHandleSide = (handleId?: string | null): string => {
     if (!handleId) return '';
@@ -205,18 +212,18 @@ const CanvasInner: React.FC = () => {
         const srcSide = extractHandleSide(e.source_handle) || 'right';
         const tgtSide = extractHandleSide(e.target_handle) || 'left';
         return {
-          id:           e.id,
-          source:       e.source,
-          target:       e.target,
+          id: e.id,
+          source: e.source,
+          target: e.target,
           sourceHandle: `${srcSide}-source`,
           targetHandle: `${tgtSide}-target`,
-          type:         'deletableEdge',
-          animated:     relCfg.animated,
-          label:        e.relation_type || 'dependency',
+          type: 'deletableEdge',
+          animated: relCfg.animated,
+          label: e.relation_type || 'dependency',
           style: {
-            stroke:          relCfg.stroke,
+            stroke: relCfg.stroke,
             strokeDasharray: relCfg.strokeDash,
-            strokeWidth:     2,
+            strokeWidth: 2,
           },
         };
       }),
@@ -225,15 +232,48 @@ const CanvasInner: React.FC = () => {
 
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => {
+      const dimUpdates: Record<string, { width: number; height: number }> = {};
+      const removedIds: string[] = [];
+
       changes.forEach((change) => {
         if (change.type === 'position' && change.position) {
           updateResourcePosition(change.id, change.position);
+        } else if (change.type === 'dimensions' && change.dimensions) {
+          if (change.dimensions.width > 0 && change.dimensions.height > 0) {
+            dimUpdates[change.id] = {
+              width: change.dimensions.width,
+              height: change.dimensions.height,
+            };
+          }
         } else if (change.type === 'select' && change.selected) {
           selectResource(change.id);
         } else if (change.type === 'remove') {
+          removedIds.push(change.id);
           removeResource(change.id);
         }
       });
+
+      if (Object.keys(dimUpdates).length > 0 || removedIds.length > 0) {
+        setMeasuredDimensions((prev) => {
+          let changed = false;
+          const next = { ...prev };
+
+          for (const [id, dims] of Object.entries(dimUpdates)) {
+            if (prev[id]?.width !== dims.width || prev[id]?.height !== dims.height) {
+              next[id] = dims;
+              changed = true;
+            }
+          }
+          for (const id of removedIds) {
+            if (id in next) {
+              delete next[id];
+              changed = true;
+            }
+          }
+
+          return changed ? next : prev;
+        });
+      }
     },
     [updateResourcePosition, selectResource, removeResource]
   );
@@ -354,9 +394,9 @@ const CanvasInner: React.FC = () => {
         const tgtSide = extractHandleSide(connection.targetHandle) || 'left';
 
         addEdge({
-          id:            `edge_${connection.source}_${connection.target}_${Date.now()}`,
-          source:        connection.source,
-          target:        connection.target,
+          id: `edge_${connection.source}_${connection.target}_${Date.now()}`,
+          source: connection.source,
+          target: connection.target,
           source_handle: srcSide,
           target_handle: tgtSide,
           relation_type: relationType,
@@ -368,35 +408,25 @@ const CanvasInner: React.FC = () => {
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
+    event.dataTransfer.dropEffect = 'copy';
   }, []);
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
 
-      // Check if an entire template blueprint was dropped
-      const tplRaw = event.dataTransfer.getData('application/azure-template');
-      if (tplRaw) {
-        try {
-          const tplTopology: CanonicalTopologyIR = JSON.parse(tplRaw);
-          loadTemplate(tplTopology);
-          setTimeout(() => {
-            reactFlow.fitView({ padding: 0.18, duration: 400 });
-          }, 80);
-          return;
-        } catch (err) {
-          console.error('Template drop error:', err);
-        }
-      }
+      const raw =
+        event.dataTransfer.getData('application/azure-template') ||
+        event.dataTransfer.getData('application/json') ||
+        event.dataTransfer.getData('text/plain');
 
-      const raw = event.dataTransfer.getData('application/json');
       if (!raw) return;
+
       try {
         const item = JSON.parse(raw);
 
-        // Check if raw JSON was a template topology
-        if (item.resources && Array.isArray(item.resources)) {
+        // Check if dropped payload was an entire template blueprint
+        if (item && Array.isArray(item.resources)) {
           loadTemplate(item as CanonicalTopologyIR);
           setTimeout(() => {
             reactFlow.fitView({ padding: 0.18, duration: 400 });
@@ -404,19 +434,21 @@ const CanvasInner: React.FC = () => {
           return;
         }
 
-        // Use React Flow's screenToFlowPosition for exact canvas coordinates
-        const flowPos = reactFlow.screenToFlowPosition({
-          x: event.clientX,
-          y: event.clientY,
-        });
+        // Handle single resource drop from catalog
+        if (item && item.resourceType) {
+          const flowPos = reactFlow.screenToFlowPosition({
+            x: event.clientX,
+            y: event.clientY,
+          });
 
-        const isContainer = ['rg', 'vnet', 'subnet'].includes(item.containerLevel || '');
-        const targetPos = {
-          x: Math.round(flowPos.x - (isContainer ? 60 : 30)),
-          y: Math.round(flowPos.y - 25),
-        };
+          const isContainer = ['rg', 'vnet', 'subnet'].includes(item.containerLevel || '');
+          const targetPos = {
+            x: Math.round(flowPos.x - (isContainer ? 60 : 30)),
+            y: Math.round(flowPos.y - 25),
+          };
 
-        addResource(item as CatalogItem, targetPos);
+          addResource(item as CatalogItem, targetPos);
+        }
       } catch (err) {
         console.error('Drop parse error:', err);
       }
@@ -426,15 +458,14 @@ const CanvasInner: React.FC = () => {
 
   return (
     <div className="w-full h-full relative" onDragOver={onDragOver} onDrop={onDrop}>
-      {/* Floating canvas toolbar */}
-      <CanvasToolbar />
-
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         connectionMode={ConnectionMode.Loose}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeDragStart={onNodeDragStart}
@@ -470,7 +501,7 @@ const CanvasInner: React.FC = () => {
             variant={BackgroundVariant.Dots}
             gap={24}
             size={1.5}
-            color={isLight ? 'rgba(148,163,184,0.85)' : 'rgba(12,102,228,0.35)'}
+            color={isLight ? 'rgba(87,83,78,0.45)' : 'rgba(167,230,143,0.24)'}
           />
         )}
 
@@ -488,23 +519,23 @@ const CanvasInner: React.FC = () => {
             zoomable
             onNodeClick={(_, node) => selectResource(node.id)}
             nodeStrokeColor={(n) => {
-              if (n.id === selectedResourceId) return '#0C66E4';
-              if (n.id === hoveredResourceId) return '#579DFF';
-              if (n.type === 'containerResource') return isLight ? 'rgba(12,102,228,0.5)' : 'rgba(12,102,228,0.5)';
-              return isLight ? 'rgba(203,213,225,0.9)' : 'rgba(12,102,228,0.3)';
+              if (n.id === selectedResourceId) return isLight ? '#1B7A43' : '#A7E68F';
+              if (n.id === hoveredResourceId) return isLight ? '#2B5A43' : '#4FD1C5';
+              if (n.type === 'containerResource') return isLight ? 'rgba(27,122,67,0.65)' : 'rgba(167,230,143,0.55)';
+              return isLight ? 'rgba(28,25,23,0.6)' : 'rgba(167,230,143,0.75)';
             }}
             nodeColor={(n) => {
-              if (n.id === selectedResourceId) return isLight ? 'rgba(12,102,228,0.25)' : 'rgba(12,102,228,0.4)';
-              if (n.type === 'containerResource') return isLight ? 'rgba(12,102,228,0.06)' : 'rgba(12,102,228,0.08)';
-              return isLight ? 'rgba(255,255,255,0.95)' : 'rgba(29,33,37,0.9)';
+              if (n.id === selectedResourceId) return isLight ? 'rgba(27,122,67,0.32)' : 'rgba(167,230,143,0.42)';
+              if (n.type === 'containerResource') return isLight ? 'rgba(27,122,67,0.08)' : 'rgba(167,230,143,0.09)';
+              return isLight ? '#FFFFFF' : '#2D3A30';
             }}
-            nodeStrokeWidth={2}
-            maskColor={isLight ? 'rgba(241,245,249,0.6)' : 'rgba(10,11,15,0.65)'}
+            nodeStrokeWidth={1.5}
+            maskColor={isLight ? 'rgba(231,229,228,0.65)' : 'rgba(12,15,13,0.65)'}
             className="!bottom-4 !right-4 !top-auto !left-auto !rounded-[var(--radius-lg)] !overflow-hidden"
             style={{
-              background:  'var(--color-surface-2)',
-              border:      '1px solid var(--color-border)',
-              boxShadow:   isLight ? '0 4px 16px rgba(0,0,0,0.08)' : '0 4px 16px rgba(0,0,0,0.4)',
+              background: 'var(--color-surface-2)',
+              border: '1px solid var(--color-border)',
+              boxShadow: isLight ? '0 4px 16px rgba(0,0,0,0.08)' : '0 4px 16px rgba(0,0,0,0.4)',
             }}
           />
         )}
@@ -516,10 +547,6 @@ const CanvasInner: React.FC = () => {
   );
 };
 
-// ─── Exported Canvas (wraps with ReactFlowProvider for hooks) ─────────────
+// ─── Exported Canvas (uses ReactFlowProvider from TopologyStudio) ─────────
 
-export const Canvas: React.FC = () => (
-  <ReactFlowProvider>
-    <CanvasInner />
-  </ReactFlowProvider>
-);
+export const Canvas: React.FC = () => <CanvasInner />;

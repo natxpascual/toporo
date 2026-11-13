@@ -3,8 +3,10 @@ import Editor from '@monaco-editor/react';
 import {
   FileCode, RefreshCw, Copy, Download, Play, FileJson,
   Package, CheckCircle2, Loader2, Wand2, AlignLeft,
+  MoreHorizontal,
 } from 'lucide-react';
 import { useTopologyStore } from '../../store/useTopologyStore';
+import { exportProjectZip } from '../../utils/exportUtils';
 
 // ─── File tab config ───────────────────────────────────────────────────────
 
@@ -19,81 +21,81 @@ type FileTab = typeof FILE_TABS[number]['id'];
 
 // ─── Monaco custom themes ───────────────────────────────────────────────────
 
-const BRAINBOARD_THEME = {
+const STUDIO_DARK_THEME = {
   base: 'vs-dark' as const,
   inherit: true,
   rules: [
-    { token: '',           foreground: 'DEE4EA', background: '1D2125' },
-    { token: 'comment',    foreground: '738496', fontStyle: 'italic' },
-    { token: 'keyword',    foreground: '579DFF', fontStyle: 'bold' },
+    { token: '',           foreground: 'F5F5F4', background: '121613' },
+    { token: 'comment',    foreground: 'A8A29E', fontStyle: 'italic' },
+    { token: 'keyword',    foreground: 'A7E68F', fontStyle: 'bold' },
     { token: 'string',     foreground: '4BCE97' },
     { token: 'number',     foreground: 'F5CD47' },
-    { token: 'type',       foreground: '6CC3E0' },
-    { token: 'variable',   foreground: 'DEE4EA' },
-    { token: 'identifier', foreground: '9F8FEF' },
-    { token: 'delimiter',  foreground: '333C43' },
-    { token: 'operator',   foreground: '9FADBC' },
+    { token: 'type',       foreground: '4FD1C5' },
+    { token: 'variable',   foreground: 'F5F5F4' },
+    { token: 'identifier', foreground: 'C4B4FF' },
+    { token: 'delimiter',  foreground: '3F4D42' },
+    { token: 'operator',   foreground: 'D6D3D1' },
   ],
   colors: {
-    'editor.background':          '#1D2125',
-    'editor.foreground':          '#DEE4EA',
-    'editor.lineHighlightBackground': '#282E3355',
-    'editor.selectionBackground': '#0C66E433',
-    'editor.findMatchBackground': '#0C66E444',
-    'editorCursor.foreground':    '#579DFF',
-    'editorLineNumber.foreground':'#738496',
-    'editorLineNumber.activeForeground': '#9FADBC',
-    'editorGutter.background':    '#1D2125',
-    'editorIndentGuide.background':'#333C43',
-    'editorIndentGuide.activeBackground': '#454F59',
+    'editor.background':          '#121613',
+    'editor.foreground':          '#F5F5F4',
+    'editor.lineHighlightBackground': '#1F262077',
+    'editor.selectionBackground': '#A7E68F2E',
+    'editor.findMatchBackground': '#A7E68F40',
+    'editorCursor.foreground':    '#A7E68F',
+    'editorLineNumber.foreground':'#78716C',
+    'editorLineNumber.activeForeground': '#D6D3D1',
+    'editorGutter.background':    '#121613',
+    'editorIndentGuide.background':'#2E3830',
+    'editorIndentGuide.activeBackground': '#3F4D42',
     'scrollbar.shadow':           '#00000000',
-    'scrollbarSlider.background': '#333C4388',
-    'scrollbarSlider.hoverBackground': '#454F5988',
-    'scrollbarSlider.activeBackground':'#0C66E455',
-    'minimap.background':         '#161A1D',
-    'editorWidget.background':    '#22272B',
-    'editorWidget.border':        '#333C43',
-    'dropdown.background':        '#22272B',
-    'dropdown.border':            '#333C43',
+    'scrollbarSlider.background': '#2E383088',
+    'scrollbarSlider.hoverBackground': '#3F4D4288',
+    'scrollbarSlider.activeBackground':'#A7E68F55',
+    'minimap.background':         '#0E120F',
+    'editorWidget.background':    '#181D19',
+    'editorWidget.border':        '#2E3830',
+    'dropdown.background':        '#181D19',
+    'dropdown.border':            '#2E3830',
   },
 };
 
-const BRAINBOARD_LIGHT_THEME = {
+const STUDIO_LIGHT_THEME = {
   base: 'vs' as const,
   inherit: true,
   rules: [
-    { token: '',           foreground: '172B4D', background: 'FFFFFF' },
-    { token: 'comment',    foreground: '626F86', fontStyle: 'italic' },
-    { token: 'keyword',    foreground: '0052CC', fontStyle: 'bold' },
-    { token: 'string',     foreground: '1F845A' },
+    { token: '',           foreground: '1C1917', background: 'F5F5F4' },
+    { token: 'comment',    foreground: '6E6863', fontStyle: 'italic' },
+    { token: 'keyword',    foreground: '145E33', fontStyle: 'bold' },
+    { token: 'string',     foreground: '1B8A4B' },
     { token: 'number',     foreground: '9E6C00' },
-    { token: 'type',       foreground: '008DA6' },
-    { token: 'variable',   foreground: '172B4D' },
+    { token: 'type',       foreground: '0E7490' },
+    { token: 'variable',   foreground: '1C1917' },
     { token: 'identifier', foreground: '6E5DC6' },
-    { token: 'delimiter',  foreground: 'DFE1E6' },
-    { token: 'operator',   foreground: '44546F' },
+    { token: 'delimiter',  foreground: 'D6D3D1' },
+    { token: 'operator',   foreground: '57534E' },
   ],
   colors: {
-    'editor.background':          '#FFFFFF',
-    'editor.foreground':          '#172B4D',
-    'editor.lineHighlightBackground': '#F1F2F4',
-    'editor.selectionBackground': '#0C66E425',
-    'editor.findMatchBackground': '#0C66E435',
-    'editorCursor.foreground':    '#0C66E4',
-    'editorLineNumber.foreground':'#8C9BAB',
-    'editorLineNumber.activeForeground': '#44546F',
-    'editorGutter.background':    '#F7F8F9',
-    'editorIndentGuide.background':'#DFE1E6',
-    'editorIndentGuide.activeBackground': '#C1C7D0',
+    'editor.background':          '#F5F5F4',
+    'editor.foreground':          '#1C1917',
+    'editor.lineHighlightBackground': '#EBE9E7',
+    'editor.selectionBackground': '#1B7A4324',
+    'editor.findMatchBackground': '#1B7A4336',
+    'editorCursor.foreground':    '#1B7A43',
+    'editorLineNumber.foreground':'#78716C',
+    'editorLineNumber.activeForeground': '#57534E',
+    'editorGutter.background':    '#EBE9E7',
+    'editorIndentGuide.background':'#D6D3D1',
+    'editorIndentGuide.activeBackground': '#A8A29E',
     'scrollbar.shadow':           '#00000000',
-    'scrollbarSlider.background': '#DFE1E688',
-    'scrollbarSlider.hoverBackground': '#C1C7D088',
-    'scrollbarSlider.activeBackground':'#0C66E444',
-    'minimap.background':         '#F7F8F9',
-    'editorWidget.background':    '#FFFFFF',
-    'editorWidget.border':        '#DFE1E6',
-    'dropdown.background':        '#FFFFFF',
-    'dropdown.border':            '#DFE1E6',
+    'scrollbarSlider.background': '#D6D3D188',
+    'scrollbarSlider.hoverBackground': '#A8A29E88',
+    'scrollbarSlider.activeBackground':'#1B7A4344',
+    'minimap.background':         '#EBE9E7',
+    'editorWidget.background':    '#F5F5F4',
+    'editorWidget.border':        '#D6D3D1',
+    'dropdown.background':        '#F5F5F4',
+    'dropdown.border':            '#D6D3D1',
   },
 };
 
@@ -370,10 +372,24 @@ export const MonacoEditor: React.FC = () => {
 
   const [currentCode, setCurrentCode] = useState('');
   const [copied, setCopied] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [themeRegistered, setThemeRegistered] = useState(false);
   const editorRef = React.useRef<any>(null);
   const monacoRef = React.useRef<any>(null);
   const decorationsRef = React.useRef<string[]>([]);
+  const moreMenuRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
+        setIsMoreOpen(false);
+      }
+    };
+    if (isMoreOpen) {
+      document.addEventListener('mousedown', handler);
+      return () => document.removeEventListener('mousedown', handler);
+    }
+  }, [isMoreOpen]);
 
   const activeFile: FileTab = (activeCodeFile as FileTab) || 'main.tf';
 
@@ -390,10 +406,10 @@ export const MonacoEditor: React.FC = () => {
     editorRef.current = editor;
     monacoRef.current = monaco;
 
-    // Register Brainboard custom dark & light themes
-    monaco.editor.defineTheme('brainboard-dark', BRAINBOARD_THEME);
-    monaco.editor.defineTheme('brainboard-light', BRAINBOARD_LIGHT_THEME);
-    const activeTheme = themeMode === 'light' ? 'brainboard-light' : 'brainboard-dark';
+    // Register custom dark & light themes
+    monaco.editor.defineTheme('studio-dark', STUDIO_DARK_THEME);
+    monaco.editor.defineTheme('studio-light', STUDIO_LIGHT_THEME);
+    const activeTheme = themeMode === 'light' ? 'studio-light' : 'studio-dark';
     monaco.editor.setTheme(activeTheme);
     setThemeRegistered(true);
 
@@ -416,7 +432,7 @@ export const MonacoEditor: React.FC = () => {
   // Synchronize Monaco theme when global themeMode changes
   useEffect(() => {
     if (monacoRef.current && themeRegistered) {
-      const activeTheme = themeMode === 'light' ? 'brainboard-light' : 'brainboard-dark';
+      const activeTheme = themeMode === 'light' ? 'studio-light' : 'studio-dark';
       monacoRef.current.editor.setTheme(activeTheme);
     }
   }, [themeMode, themeRegistered]);
@@ -502,11 +518,7 @@ export const MonacoEditor: React.FC = () => {
   };
 
   const handleDownloadZip = () => {
-    // zip download will be dispatched to backend
-    const allFiles = Object.entries(generatedCode ?? {});
-    if (allFiles.length === 0) return;
-    // For now, download main.tf only — backend zip endpoint can be hooked later
-    handleDownload();
+    exportProjectZip(generatedCode, topology, topology?.metadata?.project_name || 'Untitled Project');
   };
 
   const handleApply = () => {
@@ -522,34 +534,36 @@ export const MonacoEditor: React.FC = () => {
       className="w-full h-full flex flex-col"
       style={{ background: 'var(--color-bg)', borderLeft: '1px solid var(--color-border)' }}
     >
-      {/* ── File tabs ── */}
+      {/* ── Top Bar Container (Tabs scroll horizontally, right buttons are pinned) ── */}
       <div
-        className="flex items-center overflow-x-auto shrink-0"
-        style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)', height: 36 }}
+        className="flex items-center justify-between shrink-0 relative border-b border-[var(--color-border)] select-none"
+        style={{ background: 'var(--color-surface)', height: 36 }}
       >
-        {FILE_TABS.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setActiveCodeFile?.(id)}
-            className={`editor-tab shrink-0 ${activeFile === id ? 'active' : ''}`}
-          >
-            <Icon className="w-3 h-3 shrink-0" />
-            {label}
-            {generatedCode?.[id] && (
-              <span
-                className="w-1.5 h-1.5 rounded-full shrink-0"
-                style={{ background: activeFile === id ? 'var(--color-primary)' : 'var(--color-text-muted)' }}
-              />
-            )}
-          </button>
-        ))}
+        {/* Left: Horizontally Scrollable File Tabs */}
+        <div className="flex-1 flex items-center overflow-x-auto no-scrollbar min-w-0 h-full">
+          {FILE_TABS.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveCodeFile?.(id)}
+              className={`editor-tab shrink-0 ${activeFile === id ? 'active' : ''}`}
+            >
+              <Icon className="w-3 h-3 shrink-0" />
+              <span>{label}</span>
+              {generatedCode?.[id] && (
+                <span
+                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  style={{ background: activeFile === id ? 'var(--color-primary)' : 'var(--color-text-muted)' }}
+                />
+              )}
+            </button>
+          ))}
+        </div>
 
-        {/* Toolbar actions — right-aligned */}
-        <div className="ml-auto flex items-center gap-0.5 px-2 shrink-0">
+        {/* Right: Pinned Toolbar Actions (Format, Refresh, More, Apply) */}
+        <div className="flex items-center gap-1 px-2 shrink-0 border-l border-[var(--color-border)] bg-[var(--color-surface)] z-10 h-full">
           {isSyncing && (
-            <div className="flex items-center gap-1.5 text-[10px] px-2 font-mono" style={{ color: 'var(--color-primary-light)' }}>
+            <div className="flex items-center gap-1 text-[10px] px-1 font-mono text-[var(--color-primary-light)]">
               <Loader2 className="w-3 h-3 animate-spin" />
-              Syncing…
             </div>
           )}
 
@@ -557,12 +571,12 @@ export const MonacoEditor: React.FC = () => {
           <button
             className="toolbar-btn"
             title="Format HCL (Alt+F)"
-            onClick={() => {}}
+            onClick={() => editorRef.current?.getAction('editor.action.formatDocument')?.run()}
           >
             <AlignLeft className="w-3.5 h-3.5" />
           </button>
 
-          {/* Refresh from canvas */}
+          {/* Refresh */}
           <button
             className="toolbar-btn"
             title="Refresh from canvas state"
@@ -571,49 +585,66 @@ export const MonacoEditor: React.FC = () => {
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
 
-          {/* Copy */}
-          <button
-            className={`toolbar-btn ${copied ? 'active' : ''}`}
-            title="Copy to clipboard"
-            onClick={handleCopy}
-          >
-            {copied ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-          </button>
+          {/* More Dropdown (Three Dots) placed after refresh */}
+          <div ref={moreMenuRef} className="relative">
+            <button
+              onClick={() => setIsMoreOpen(p => !p)}
+              className={`toolbar-btn ${isMoreOpen ? 'active' : ''}`}
+              title="More Actions"
+            >
+              <MoreHorizontal className="w-3.5 h-3.5" />
+            </button>
 
-          {/* Download file */}
-          <button
-            className="toolbar-btn"
-            title={`Download ${activeFile}`}
-            onClick={handleDownload}
-          >
-            <Download className="w-3.5 h-3.5" />
-          </button>
+            {isMoreOpen && (
+              <div
+                className="absolute top-full right-0 mt-1 w-48 rounded-[var(--radius-sm)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl z-50 py-1 animate-fade-in"
+                onClick={() => setIsMoreOpen(false)}
+              >
+                {/* Copy to clipboard */}
+                <button
+                  onClick={handleCopy}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-[12px] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-2)] transition-colors"
+                >
+                  {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-[#1F845A]" /> : <Copy className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />}
+                  <span>{copied ? 'Copied!' : 'Copy to Clipboard'}</span>
+                </button>
 
-          {/* Download zip */}
-          <button
-            className="toolbar-btn"
-            title="Download all files as .zip"
-            onClick={handleDownloadZip}
-          >
-            <Package className="w-3.5 h-3.5" />
-          </button>
+                {/* Download main.tf (or current active file) */}
+                <button
+                  onClick={handleDownload}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-[12px] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-2)] transition-colors"
+                >
+                  <Download className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
+                  <span>Download {activeFile}</span>
+                </button>
 
-          {/* Divider */}
+                {/* Download all files as .zip */}
+                <button
+                  onClick={handleDownloadZip}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-[12px] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-2)] transition-colors"
+                >
+                  <Package className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
+                  <span>Download All Files (.zip)</span>
+                </button>
+              </div>
+            )}
+          </div>
+
           <div className="toolbar-divider" />
 
-          {/* Apply code changes to canvas */}
+          {/* Blue Apply button pinned */}
           {activeFile === 'main.tf' && (
             <button
               onClick={handleApply}
               disabled={isSyncing}
-              className="flex items-center gap-1.5 px-2.5 h-6 rounded-[3px] text-[11px] font-semibold text-white transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-2.5 h-6 rounded-[3px] text-[11px] font-semibold text-white transition-colors disabled:opacity-50 shrink-0"
               style={{
                 background: 'var(--color-primary)',
               }}
               title="Apply HCL changes to canvas (⌘S)"
             >
               <Play className="w-2.5 h-2.5 fill-current" />
-              Apply
+              <span>Apply</span>
             </button>
           )}
         </div>
@@ -624,7 +655,7 @@ export const MonacoEditor: React.FC = () => {
         <Editor
           height="100%"
           language="hcl"
-          theme={themeRegistered ? (themeMode === 'light' ? 'brainboard-light' : 'brainboard-dark') : (themeMode === 'light' ? 'vs' : 'vs-dark')}
+          theme={themeRegistered ? (themeMode === 'light' ? 'studio-light' : 'studio-dark') : (themeMode === 'light' ? 'vs' : 'vs-dark')}
           value={currentCode}
           onChange={(val) => setCurrentCode(val || '')}
           onMount={handleEditorMount}
@@ -651,25 +682,6 @@ export const MonacoEditor: React.FC = () => {
             },
           }}
         />
-      </div>
-
-      {/* ── Status bar ── */}
-      <div
-        className="flex items-center justify-between px-3 h-[22px] shrink-0 text-[10.5px] font-mono select-none"
-        style={{
-          background:   'var(--color-surface)',
-          borderTop:    '1px solid var(--color-border)',
-          color:        'var(--color-text-muted)',
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <span>Terraform HCL</span>
-          <span>{lineCount} lines</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span>UTF-8</span>
-          <span>Spaces: 2</span>
-        </div>
       </div>
     </div>
   );

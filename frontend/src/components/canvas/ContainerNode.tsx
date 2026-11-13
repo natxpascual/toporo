@@ -2,7 +2,7 @@ import React, { memo, useState } from 'react';
 import { Handle, Position, NodeProps, NodeResizer } from '@xyflow/react';
 import {
   ChevronDown, ChevronUp, Copy, Trash2, Check,
-  ExternalLink, Layers, Eye, SlidersHorizontal,
+  ExternalLink, SlidersHorizontal,
   Pencil,
 } from 'lucide-react';
 import { AzureResourceIR } from '../../services/api';
@@ -13,37 +13,37 @@ import { useTopologyStore } from '../../store/useTopologyStore';
 
 const CONTAINER_CONFIG = {
   azurerm_resource_group: {
-    borderColor: 'rgba(12,102,228,0.35)',
-    borderColorHover: 'rgba(12,102,228,0.7)',
-    bgColor: 'rgba(12,102,228,0.02)',
-    headerColor: 'rgba(12,102,228,0.08)',
+    borderColor: 'rgba(27,138,75,0.38)',
+    borderColorHover: 'rgba(27,138,75,0.72)',
+    bgColor: 'rgba(27,138,75,0.025)',
+    headerColor: 'rgba(27,138,75,0.08)',
     badgeText: 'Resource Group',
-    badgeBg: 'rgba(12,102,228,0.12)',
-    badgeColor: '#579DFF',
-    badgeBorder: 'rgba(12,102,228,0.25)',
-    accentColor: '#0C66E4',
+    badgeBg: 'rgba(27,138,75,0.12)',
+    badgeColor: 'var(--color-primary-light)',
+    badgeBorder: 'rgba(27,138,75,0.28)',
+    accentColor: 'var(--color-primary)',
   },
   azurerm_virtual_network: {
-    borderColor: 'rgba(0,120,212,0.35)',
-    borderColorHover: 'rgba(0,120,212,0.7)',
-    bgColor: 'rgba(0,120,212,0.02)',
-    headerColor: 'rgba(0,120,212,0.08)',
+    borderColor: 'rgba(1,179,159,0.38)',
+    borderColorHover: 'rgba(1,179,159,0.72)',
+    bgColor: 'rgba(1,179,159,0.025)',
+    headerColor: 'rgba(1,179,159,0.08)',
     badgeText: 'Virtual Network',
-    badgeBg: 'rgba(0,120,212,0.12)',
-    badgeColor: '#93C5FD',
-    badgeBorder: 'rgba(0,120,212,0.25)',
-    accentColor: '#0078D4',
+    badgeBg: 'rgba(1,179,159,0.12)',
+    badgeColor: 'var(--azure-network)',
+    badgeBorder: 'rgba(1,179,159,0.28)',
+    accentColor: '#01B39F',
   },
   azurerm_subnet: {
-    borderColor: 'rgba(31,132,90,0.35)',
-    borderColorHover: 'rgba(31,132,90,0.7)',
-    bgColor: 'rgba(31,132,90,0.02)',
-    headerColor: 'rgba(31,132,90,0.08)',
+    borderColor: 'rgba(43,90,67,0.42)',
+    borderColorHover: 'rgba(43,90,67,0.75)',
+    bgColor: 'rgba(43,90,67,0.025)',
+    headerColor: 'rgba(43,90,67,0.08)',
     badgeText: 'Subnet',
-    badgeBg: 'rgba(31,132,90,0.12)',
-    badgeColor: '#4BCE97',
-    badgeBorder: 'rgba(31,132,90,0.25)',
-    accentColor: '#1F845A',
+    badgeBg: 'rgba(43,90,67,0.12)',
+    badgeColor: 'var(--color-success)',
+    badgeBorder: 'rgba(43,90,67,0.28)',
+    accentColor: '#2B5A43',
   },
 } as const;
 
@@ -91,7 +91,6 @@ export const ContainerNode = memo(({ data, selected }: NodeProps & { data: Conta
   const [collapsed, setCollapsed] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [showChildrenList, setShowChildrenList] = useState(false);
   const [copiedHcl, setCopiedHcl] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [liveDimensions, setLiveDimensions] = useState<{ width: number; height: number } | null>(null);
@@ -393,20 +392,19 @@ export const ContainerNode = memo(({ data, selected }: NodeProps & { data: Conta
       <div
         className="absolute inset-0 rounded-[var(--radius-lg)] pointer-events-none"
         style={{
-          background:   isDirectHovered ? `${cfg.accentColor}12` : isIlluminated ? `${cfg.accentColor}08` : cfg.bgColor,
-          border:       `2px ${isIlluminated || selected ? 'solid' : 'dashed'} ${
-            selected || isDirectHovered
+          background: isDirectHovered ? `${cfg.accentColor}12` : isIlluminated ? `${cfg.accentColor}08` : cfg.bgColor,
+          border: `2px ${isIlluminated || selected ? 'solid' : 'dashed'} ${selected || isDirectHovered
               ? cfg.accentColor
               : isIlluminated
-              ? cfg.accentColor
-              : hovered
-              ? cfg.borderColorHover
-              : cfg.borderColor
-          }`,
-          boxShadow:    selected || isDirectHovered
+                ? cfg.accentColor
+                : hovered
+                  ? cfg.borderColorHover
+                  : cfg.borderColor
+            }`,
+          boxShadow: selected || isDirectHovered
             ? `0 0 0 2px var(--color-primary-glow), 0 4px 16px rgba(0,0,0,0.2)`
             : 'none',
-          transition:   'border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease',
+          transition: 'border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease',
         }}
       />
 
@@ -420,8 +418,8 @@ export const ContainerNode = memo(({ data, selected }: NodeProps & { data: Conta
             borderBottom: collapsed ? 'none' : `1px solid ${cfg.borderColor}`,
           }}
         >
-          {/* Left: icon + name + CIDR + Ancestors */}
-          <div className="flex items-center gap-2 overflow-hidden">
+          {/* Left: icon + editable name */}
+          <div className="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
             <div
               className="w-7 h-7 rounded-[3px] flex items-center justify-center shrink-0 bg-[var(--color-surface)] border border-[var(--color-border)]"
             >
@@ -444,98 +442,29 @@ export const ContainerNode = memo(({ data, selected }: NodeProps & { data: Conta
                 />
               ) : (
                 <div
-                  className="text-[12px] font-bold truncate flex items-center gap-2 cursor-text hover:text-[var(--color-primary-light)] transition-colors group/name text-[var(--color-text-primary)]"
+                  className="text-[12px] font-bold truncate flex items-center gap-1.5 cursor-text hover:text-[var(--color-primary-light)] transition-colors group/name text-[var(--color-text-primary)]"
                   title="Double-click to rename"
                   onDoubleClick={handleStartRename}
                 >
                   <span className="truncate">{res.name}</span>
                   <Pencil className="w-2.5 h-2.5 opacity-0 group-hover/name:opacity-70 shrink-0 text-[var(--color-primary-light)]" />
-                  {ancestors.length > 0 && (
-                    <span className="text-[10px] font-normal text-[var(--color-text-muted)] flex items-center gap-1">
-                      (in {ancestors[ancestors.length - 1].name})
-                    </span>
-                  )}
-                </div>
-              )}
-              {cidr && !collapsed && (
-                <div
-                  className="text-[10px] truncate text-[var(--color-text-muted)] font-mono"
-                >
-                  {cidr}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Right: badge + interactive nested resource count + collapse button */}
-          <div className="flex items-center gap-1.5 shrink-0">
+          {/* Right: CIDR pill + type badge + collapse button */}
+          <div className="flex items-center gap-1.5 shrink-0 ml-2">
             {copiedHcl && (
               <span className="text-[10px] font-bold text-[#1F845A] bg-[#DCFFF1] dark:bg-[#143B2B] dark:text-[#4BCE97] px-1.5 py-0.5 rounded-[3px] flex items-center gap-1">
                 <Check className="w-3 h-3" /> Copied
               </span>
             )}
 
-            {/* Clickable nested item badge with dropdown */}
-            {childCount > 0 && (
-              <div className="relative">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowChildrenList((p) => !p);
-                  }}
-                  className="text-[10px] font-semibold px-2 py-0.5 rounded-[3px] flex items-center gap-1 transition-colors hover:opacity-90"
-                  style={{
-                    background: cfg.badgeBg,
-                    color: cfg.badgeColor,
-                    border: `1px solid ${cfg.badgeBorder}`,
-                    fontFamily: "'SFMono-Medium', 'SF Mono', monospace",
-                  }}
-                  title={`${childCount} nested resources (click to view)`}
-                >
-                  <Layers className="w-2.5 h-2.5" />
-                  <span>{childCount}</span>
-                  <span className="text-[9px] font-normal opacity-80">items</span>
-                </button>
-
-                {/* Popover listing contained resources */}
-                {showChildrenList && (
-                  <div
-                    className="absolute right-0 top-full mt-1 z-50 min-w-[200px] max-h-56 overflow-y-auto rounded-[var(--radius-sm)] p-1 animate-fade-in"
-                    style={{
-                      background: 'var(--color-surface)',
-                      border: '1px solid var(--color-border)',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                    onMouseLeave={() => setShowChildrenList(false)}
-                  >
-                    <div className="px-2 py-1 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider border-b border-[var(--color-border)] mb-1">
-                      Contained in {res.name}
-                    </div>
-                    {childrenList.map((ch) => (
-                      <button
-                        key={ch.id}
-                        onClick={() => {
-                          selectResource(ch.id);
-                          setShowChildrenList(false);
-                        }}
-                        className="w-full flex items-center gap-2 px-2 py-1 rounded text-left hover:bg-[var(--color-surface-2)] transition-colors group"
-                      >
-                        <AzureIcon type={ch.type} size={15} />
-                        <div className="overflow-hidden flex-1">
-                          <div className="text-[11px] font-medium text-[var(--color-text-primary)] group-hover:text-[var(--color-primary-light)] truncate">
-                            {ch.name}
-                          </div>
-                          <div className="text-[9px] text-[var(--color-text-muted)] truncate">
-                            {ch.type.replace('azurerm_', '')}
-                          </div>
-                        </div>
-                        <Eye className="w-3 h-3 text-[var(--color-text-muted)] group-hover:text-[var(--color-text-primary)] shrink-0" />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+            {cidr && !collapsed && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded font-mono text-[var(--color-text-muted)] bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+                {cidr}
+              </span>
             )}
 
             <div
@@ -574,8 +503,8 @@ export const ContainerNode = memo(({ data, selected }: NodeProps & { data: Conta
                 {res.type === 'azurerm_resource_group'
                   ? 'VNets, compute, databases, storage & PaaS'
                   : res.type === 'azurerm_virtual_network'
-                  ? 'Subnets & network gateways'
-                  : 'VMs, private endpoints & application services'}
+                    ? 'Subnets & network gateways'
+                    : 'VMs, private endpoints & application services'}
               </div>
             </div>
           </div>

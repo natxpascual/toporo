@@ -1,26 +1,27 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
-      // ─── Design System Palette ───
+      // ─── Design System Palette (Aligned to Toporo Forest & Mint) ───
       colors: {
         // Primary Brand Palette
         brand: {
-          50:  '#E9F2FF',
-          100: '#CCE0FF',
-          200: '#85B8FF',
-          300: '#579DFF',
-          400: '#2684FF',
-          500: '#0C66E4',   // Primary Blue
-          600: '#0052CC',   // Deep Blue
-          700: '#0747A6',   // Active Blue
-          800: '#09326C',
-          900: '#052147',
-          950: '#021226',
+          50:  '#F0FDF4',
+          100: '#DCFCE7',
+          200: '#C7F2B6',
+          300: '#A7E68F',   // Mint Accent
+          400: '#4BCE97',
+          500: '#1B8A4B',   // Primary Forest Green
+          600: '#1B7A43',   // Light Mode Primary
+          700: '#2B5A43',   // Board Green
+          800: '#143B2B',
+          900: '#0B1D0B',   // Deep Forest
+          950: '#061106',
         },
         // Alias primary brand for backwards compatibility
         violet: {
@@ -112,6 +113,22 @@ export default {
           card:   'var(--color-surface)',
           border: 'var(--color-border)',
           hover:  'var(--color-surface-2)',
+        },
+        // Toporo Architectural Blueprint Homepage Palette
+        tp: {
+          bg:      'var(--tp-bg)',
+          surface: 'var(--tp-surface)',
+          sunken:  'var(--tp-sunken)',
+          main:    'var(--tp-main)',
+          muted:   'var(--tp-muted)',
+          line:    'var(--tp-line)',
+          green:   'var(--tp-green)',
+          mint:    '#a7e68f',
+          forest:  '#0b1d0b',
+          carbon:  '#171717',
+          board:   '#2b5a43',
+          blue:    'var(--tp-blue)',
+          yellow:  '#F1ED92',
         },
       },
 

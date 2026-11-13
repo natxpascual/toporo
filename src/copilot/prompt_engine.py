@@ -35,7 +35,7 @@ Rules:
     def generate_topology_from_prompt(
         cls, prompt: str, current_topology: Optional[CanonicalTopology] = None
     ) -> CanonicalTopology:
-        """Generate or enhance architecture topology using Azure OpenAI GPT-4o or blueprint templates."""
+        """Generate or enhance architecture topology using Azure OpenAI (gpt-4o-mini default) or blueprint templates."""
         api_key = os.getenv("AZURE_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
 
         if api_key:
@@ -43,7 +43,7 @@ Rules:
                 from openai import OpenAI
                 client = OpenAI(api_key=api_key)
                 response = client.chat.completions.create(
-                    model=os.getenv("AZURE_OPENAI_MODEL", "gpt-4o"),
+                    model=os.getenv("AZURE_OPENAI_MODEL", "gpt-4o-mini"),
                     messages=[
                         {"role": "system", "content": cls.SYSTEM_PROMPT},
                         {"role": "user", "content": prompt},

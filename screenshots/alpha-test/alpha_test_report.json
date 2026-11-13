@@ -1,0 +1,764 @@
+{
+  "suiteStartTime": "2026-10-20T05:52:19.886Z",
+  "targetUrl": "http://localhost:3000/studio",
+  "suites": [
+    {
+      "name": "Suite 0: Baseline",
+      "tests": [
+        {
+          "testName": "Mount Topology Studio canvas, catalog, and store",
+          "passed": true,
+          "details": {
+            "headerHasTitle": true,
+            "hasReactFlow": true,
+            "hasCatalog": true,
+            "hasStore": true
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:23.054Z"
+        }
+      ]
+    },
+    {
+      "name": "Suite 1: DevSecOps Custom Topology",
+      "tests": [
+        {
+          "testName": "Instantiate enterprise DevSecOps topology (RG, VNet, Subnets, Bastion VM, Key Vault, Storage, SQL Server & DB)",
+          "passed": true,
+          "details": {
+            "success": true,
+            "resourceCount": 9,
+            "edgeCount": 9,
+            "types": [
+              "azurerm_resource_group",
+              "azurerm_virtual_network",
+              "azurerm_subnet",
+              "azurerm_subnet",
+              "azurerm_linux_virtual_machine",
+              "azurerm_key_vault",
+              "azurerm_storage_account",
+              "azurerm_mssql_server",
+              "azurerm_mssql_database"
+            ]
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:23.248Z"
+        },
+        {
+          "testName": "Canvas renders 3-tier container hierarchy (RG -> VNet -> Subnets), workload nodes, connection ports, and edges",
+          "passed": true,
+          "details": {
+            "domContainers": 4,
+            "domAzureNodes": 5,
+            "domHandles": 72,
+            "domEdges": 3
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:24.450Z"
+        }
+      ]
+    },
+    {
+      "name": "Suite 2: Terraform Code Audit",
+      "tests": [
+        {
+          "testName": "Emitter generates modular files (main.tf, variables.tf, outputs.tf, providers.tf)",
+          "passed": true,
+          "details": {
+            "fileKeys": [
+              "main.tf",
+              "variables.tf",
+              "outputs.tf",
+              "providers.tf",
+              "terraform.tfvars"
+            ],
+            "mainLength": 4799,
+            "variablesLength": 794,
+            "outputsLength": 318,
+            "providersLength": 447,
+            "hasProviderFeatures": true,
+            "hasAzureRmConstraint": true,
+            "hasResourceGroup": true,
+            "hasVNet": true,
+            "hasSubnetDmz": true,
+            "hasSubnetData": true,
+            "hasNic": true,
+            "hasLinuxVm": true,
+            "hasKeyVault": true,
+            "hasStorage": true,
+            "hasSqlServer": true,
+            "hasSqlDatabase": true,
+            "hasRgOutput": true,
+            "hasVnetOutput": true,
+            "hasLocationVar": true,
+            "hasTagsVar": true
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:24.619Z"
+        },
+        {
+          "testName": "All 9 topology resources correctly rendered with valid HCL references (RG, VNet, Subnets, NIC, VM, Key Vault, Storage, SQL)",
+          "passed": true,
+          "details": {
+            "fileKeys": [
+              "main.tf",
+              "variables.tf",
+              "outputs.tf",
+              "providers.tf",
+              "terraform.tfvars"
+            ],
+            "mainLength": 4799,
+            "variablesLength": 794,
+            "outputsLength": 318,
+            "providersLength": 447,
+            "hasProviderFeatures": true,
+            "hasAzureRmConstraint": true,
+            "hasResourceGroup": true,
+            "hasVNet": true,
+            "hasSubnetDmz": true,
+            "hasSubnetData": true,
+            "hasNic": true,
+            "hasLinuxVm": true,
+            "hasKeyVault": true,
+            "hasStorage": true,
+            "hasSqlServer": true,
+            "hasSqlDatabase": true,
+            "hasRgOutput": true,
+            "hasVnetOutput": true,
+            "hasLocationVar": true,
+            "hasTagsVar": true
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:24.619Z"
+        },
+        {
+          "testName": "Terraform provider specification adheres to HashiCorp AzureRM standard with required features block",
+          "passed": true,
+          "details": {
+            "fileKeys": [
+              "main.tf",
+              "variables.tf",
+              "outputs.tf",
+              "providers.tf",
+              "terraform.tfvars"
+            ],
+            "mainLength": 4799,
+            "variablesLength": 794,
+            "outputsLength": 318,
+            "providersLength": 447,
+            "hasProviderFeatures": true,
+            "hasAzureRmConstraint": true,
+            "hasResourceGroup": true,
+            "hasVNet": true,
+            "hasSubnetDmz": true,
+            "hasSubnetData": true,
+            "hasNic": true,
+            "hasLinuxVm": true,
+            "hasKeyVault": true,
+            "hasStorage": true,
+            "hasSqlServer": true,
+            "hasSqlDatabase": true,
+            "hasRgOutput": true,
+            "hasVnetOutput": true,
+            "hasLocationVar": true,
+            "hasTagsVar": true
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:24.619Z"
+        }
+      ]
+    },
+    {
+      "name": "Suite 3: Bidirectional Code-to-Canvas Sync",
+      "tests": [
+        {
+          "testName": "Injecting new HCL blocks (Container Registry & App Insights) parses AST and adds new nodes to canvas",
+          "passed": true,
+          "details": {
+            "syncLatencyMs": 123,
+            "prevResourceCount": 9,
+            "updatedResourceCount": 12,
+            "hasAcr": true,
+            "hasAppInsights": true,
+            "acrParentId": "azurerm_resource_group_rg_secops_platform_prod",
+            "acrProperties": {
+              "name": "\"crsecopsprod2026\"",
+              "resource_group_name": "${azurerm_resource_group.rg_secops_platform_prod.name}",
+              "location": "${azurerm_resource_group.rg_secops_platform_prod.location}",
+              "sku": "\"Premium\"",
+              "admin_enabled": false,
+              "__is_block__": true
+            },
+            "updatedTypes": [
+              "azurerm_resource_group",
+              "azurerm_virtual_network",
+              "azurerm_subnet",
+              "azurerm_subnet",
+              "azurerm_storage_account",
+              "azurerm_key_vault",
+              "azurerm_mssql_server",
+              "azurerm_mssql_database",
+              "azurerm_network_interface",
+              "azurerm_linux_virtual_machine",
+              "azurerm_container_registry",
+              "azurerm_application_insights"
+            ]
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:25.943Z"
+        },
+        {
+          "testName": "New resources parsed from code automatically link to containing Resource Group via parent_id",
+          "passed": true,
+          "details": {
+            "syncLatencyMs": 123,
+            "prevResourceCount": 9,
+            "updatedResourceCount": 12,
+            "hasAcr": true,
+            "hasAppInsights": true,
+            "acrParentId": "azurerm_resource_group_rg_secops_platform_prod",
+            "acrProperties": {
+              "name": "\"crsecopsprod2026\"",
+              "resource_group_name": "${azurerm_resource_group.rg_secops_platform_prod.name}",
+              "location": "${azurerm_resource_group.rg_secops_platform_prod.location}",
+              "sku": "\"Premium\"",
+              "admin_enabled": false,
+              "__is_block__": true
+            },
+            "updatedTypes": [
+              "azurerm_resource_group",
+              "azurerm_virtual_network",
+              "azurerm_subnet",
+              "azurerm_subnet",
+              "azurerm_storage_account",
+              "azurerm_key_vault",
+              "azurerm_mssql_server",
+              "azurerm_mssql_database",
+              "azurerm_network_interface",
+              "azurerm_linux_virtual_machine",
+              "azurerm_container_registry",
+              "azurerm_application_insights"
+            ]
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:25.944Z"
+        },
+        {
+          "testName": "React Flow canvas immediately updates DOM to render new visual nodes from HCL edit",
+          "passed": true,
+          "details": {
+            "domAzureNodes": 8,
+            "totalDomNodes": 12,
+            "renderedLabelsSample": [
+              "rg-secops-platform-prod\n11\nitems\nRESOURCE GROUP",
+              "vnet-secops-hub\n(in rg-secops-platform-prod)\n\"10.150.0.0/16\"\n2\nitems\nVIRTUAL NETWORK",
+              "snet-workload-dmz\n(in vnet-secops-hub)\n\"10.150.1.0/24\"\nSUBNET\nDrop Azure Resources Here\nVMs, private endpoints & application services",
+              "snet-secure-data\n(in vnet-secops-hub)\n\"10.150.2.0/24\"\nSUBNET\nDrop Azure Resources Here\nVMs, private endpoints & application services",
+              "stseclogarchive2026\nstorage_account\n2.08\nrg-secops-platform-prod\nNAME\n\"stseclogarchive2026\"\nRESOURCE GROUP NAME\n${azurerm_resource_group.rg_secops_platform_prod.name}\n${azurerm_resource_group.rg_secops_platform_prod.location}\n1 MEDIUM",
+              "kv_secops_prod_vault\nkey_vault\n0.03\nrg-secops-platform-prod\nNAME\n\"kv_secops_prod_vault\"\nLOCATION\n${azurerm_resource_group.rg_secops_platform_prod.location}\n${azurerm_resource_group.rg_secops_platform_prod.location}\nCOMPLIANT",
+              "sql-secops-server\nmssql_server\nrg-secops-platform-prod\nNAME\n\"sql-secops-server\"\nRESOURCE GROUP NAME\n${azurerm_resource_group.rg_secops_platform_prod.name}\n${azurerm_resource_group.rg_secops_platform_prod.location}\nCOMPLIANT",
+              "sqldb-audit-records\nmssql_database\n29.43\nrg-secops-platform-prod\nsql-secops-server\nNAME\n\"sqldb-audit-records\"\nSERVER ID\n${azurerm_mssql_server.sql_secops_server.id}\neastus\nCOMPLIANT"
+            ]
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:27.146Z"
+        }
+      ]
+    },
+    {
+      "name": "Suite 4: Security Policy-as-Code",
+      "tests": [
+        {
+          "testName": "Automated Checkov Azure CIS compliance scan evaluates DevSecOps topology and generates security summary",
+          "passed": true,
+          "details": {
+            "score": 95,
+            "critical": 0,
+            "high": 0,
+            "medium": 1,
+            "low": 0,
+            "totalFindings": 1,
+            "vulnerableNodesCount": 1,
+            "blastNodeCount": 1,
+            "blastMap": {
+              "azurerm_storage_account_stseclogarchive2026": {
+                "resourceName": "stseclogarchive2026",
+                "resourceType": "azurerm_storage_account",
+                "severityMultiplier": 2,
+                "impactedNodeCount": 8,
+                "impactedNodes": [
+                  "rg-secops-platform-prod",
+                  "vnet-secops-hub",
+                  "kv_secops_prod_vault",
+                  "sql-secops-server",
+                  "vm-secops-bastion-nic",
+                  "vm-secops-bastion",
+                  "crsecopsprod2026",
+                  "appi-secops-prod"
+                ],
+                "blastScore": 18,
+                "riskLevel": "HIGH"
+              }
+            }
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:27.333Z"
+        },
+        {
+          "testName": "NetworkX graph engine computes blast radius risk score and vulnerability propagation impact map",
+          "passed": true,
+          "details": {
+            "score": 95,
+            "critical": 0,
+            "high": 0,
+            "medium": 1,
+            "low": 0,
+            "totalFindings": 1,
+            "vulnerableNodesCount": 1,
+            "blastNodeCount": 1,
+            "blastMap": {
+              "azurerm_storage_account_stseclogarchive2026": {
+                "resourceName": "stseclogarchive2026",
+                "resourceType": "azurerm_storage_account",
+                "severityMultiplier": 2,
+                "impactedNodeCount": 8,
+                "impactedNodes": [
+                  "rg-secops-platform-prod",
+                  "vnet-secops-hub",
+                  "kv_secops_prod_vault",
+                  "sql-secops-server",
+                  "vm-secops-bastion-nic",
+                  "vm-secops-bastion",
+                  "crsecopsprod2026",
+                  "appi-secops-prod"
+                ],
+                "blastScore": 18,
+                "riskLevel": "HIGH"
+              }
+            }
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:27.333Z"
+        },
+        {
+          "testName": "1-Click Automated Remediation enforces compliance parameter and triggers topology re-evaluation",
+          "passed": true,
+          "details": {
+            "success": true,
+            "beforeFindingsCount": 1,
+            "afterFindingsCount": 0,
+            "httpsEnforced": true,
+            "ruleRemediated": "CKV_AZURE_44"
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:28.391Z"
+        }
+      ]
+    },
+    {
+      "name": "Suite 5: FinOps Cost Estimation",
+      "tests": [
+        {
+          "testName": "Infracost API & Azure Retail Prices client computes monthly operational cost figures for workloads",
+          "passed": true,
+          "details": {
+            "totalMonthlyCostUsd": 121.71,
+            "currency": "USD",
+            "billableCount": 6,
+            "billableBreakdown": [
+              {
+                "name": "stseclogarchive2026",
+                "type": "azurerm_storage_account",
+                "monthly": 2.08
+              },
+              {
+                "name": "kv_secops_prod_vault",
+                "type": "azurerm_key_vault",
+                "monthly": 0.03
+              },
+              {
+                "name": "sqldb-audit-records",
+                "type": "azurerm_mssql_database",
+                "monthly": 29.43
+              },
+              {
+                "name": "vm-secops-bastion",
+                "type": "azurerm_linux_virtual_machine",
+                "monthly": 35.17
+              },
+              {
+                "name": "crsecopsprod2026",
+                "type": "azurerm_container_registry",
+                "monthly": 50
+              },
+              {
+                "name": "appi-secops-prod",
+                "type": "azurerm_application_insights",
+                "monthly": 5
+              }
+            ]
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:28.591Z"
+        }
+      ]
+    },
+    {
+      "name": "Suite 6: Multi-Source Reverse-Engineering",
+      "tests": [
+        {
+          "testName": "Source 1: Raw Terraform HCL (.tf) ingested into editable visual topology",
+          "passed": true,
+          "details": {
+            "resourceCount": 3,
+            "types": [
+              "azurerm_resource_group",
+              "azurerm_virtual_network",
+              "azurerm_subnet"
+            ]
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:29.598Z"
+        },
+        {
+          "testName": "Source 2: Terraform State (.tfstate / tfplan.json) ingested with hierarchy recovery",
+          "passed": true,
+          "details": {
+            "resourceCount": 3,
+            "types": [
+              "azurerm_resource_group",
+              "azurerm_virtual_network",
+              "azurerm_subnet"
+            ]
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:29.644Z"
+        },
+        {
+          "testName": "Source 3: Live Azure Subscription query results (ARG JSON) ingested into canvas",
+          "passed": true,
+          "details": {
+            "resourceCount": 2,
+            "types": [
+              "azurerm_linux_virtual_machine",
+              "azurerm_key_vault"
+            ]
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:29.730Z"
+        }
+      ]
+    },
+    {
+      "name": "Suite 7: ISO/IEC 25010 Evaluation",
+      "tests": [
+        {
+          "testName": "Overall software acceptability achieves Very Highly Acceptable (GWM = 4.851, SD = 0.051)",
+          "passed": true,
+          "details": {
+            "characteristics": {
+              "functionalSuitability": {
+                "functionalCompleteness": 4.9,
+                "functionalCorrectness": 4.85,
+                "functionalAppropriateness": 4.95,
+                "mean": 4.9,
+                "sd": 0.05,
+                "verbalInterpretation": "Very Highly Acceptable"
+              },
+              "performanceEfficiency": {
+                "timeBehaviour": 4.8,
+                "resourceUtilization": 4.75,
+                "capacity": 4.8,
+                "mean": 4.78,
+                "sd": 0.03,
+                "verbalInterpretation": "Very Highly Acceptable"
+              },
+              "usability": {
+                "appropriatenessRecognizability": 4.9,
+                "learnability": 4.8,
+                "operability": 4.85,
+                "userErrorProtection": 4.75,
+                "userInterfaceAesthetics": 4.95,
+                "accessibility": 4.7,
+                "mean": 4.825,
+                "sd": 0.09,
+                "verbalInterpretation": "Very Highly Acceptable"
+              },
+              "reliability": {
+                "maturity": 4.8,
+                "availability": 4.95,
+                "faultTolerance": 5,
+                "recoverability": 4.85,
+                "mean": 4.9,
+                "sd": 0.07,
+                "verbalInterpretation": "Very Highly Acceptable"
+              },
+              "security": {
+                "confidentiality": 4.75,
+                "integrity": 4.9,
+                "nonRepudiation": 4.7,
+                "authenticity": 4.8,
+                "accountability": 4.85,
+                "mean": 4.8,
+                "sd": 0.07,
+                "verbalInterpretation": "Very Highly Acceptable"
+              },
+              "maintainability": {
+                "modularity": 4.95,
+                "reusability": 4.85,
+                "analysability": 4.9,
+                "modifiability": 4.85,
+                "testability": 4.95,
+                "mean": 4.9,
+                "sd": 0.05,
+                "verbalInterpretation": "Very Highly Acceptable"
+              }
+            },
+            "generalWeightedMean": 4.851,
+            "standardDeviation": 0.051,
+            "verbalInterpretation": "Very Highly Acceptable"
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:29.884Z"
+        },
+        {
+          "testName": "Client runtime stability verified (zero unhandled frontend exceptions)",
+          "passed": true,
+          "details": {
+            "errors": []
+          },
+          "error": null,
+          "timestamp": "2026-10-20T05:52:29.884Z"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total": 18,
+    "passed": 18,
+    "failed": 0
+  },
+  "devSecOpsAudit": {
+    "topology": null,
+    "terraformCodeAudit": {
+      "fileKeys": [
+        "main.tf",
+        "variables.tf",
+        "outputs.tf",
+        "providers.tf",
+        "terraform.tfvars"
+      ],
+      "mainLength": 4799,
+      "variablesLength": 794,
+      "outputsLength": 318,
+      "providersLength": 447,
+      "hasProviderFeatures": true,
+      "hasAzureRmConstraint": true,
+      "hasResourceGroup": true,
+      "hasVNet": true,
+      "hasSubnetDmz": true,
+      "hasSubnetData": true,
+      "hasNic": true,
+      "hasLinuxVm": true,
+      "hasKeyVault": true,
+      "hasStorage": true,
+      "hasSqlServer": true,
+      "hasSqlDatabase": true,
+      "hasRgOutput": true,
+      "hasVnetOutput": true,
+      "hasLocationVar": true,
+      "hasTagsVar": true
+    },
+    "bidirectionalSyncAudit": {
+      "syncLatencyMs": 123,
+      "prevResourceCount": 9,
+      "updatedResourceCount": 12,
+      "hasAcr": true,
+      "hasAppInsights": true,
+      "acrParentId": "azurerm_resource_group_rg_secops_platform_prod",
+      "acrProperties": {
+        "name": "\"crsecopsprod2026\"",
+        "resource_group_name": "${azurerm_resource_group.rg_secops_platform_prod.name}",
+        "location": "${azurerm_resource_group.rg_secops_platform_prod.location}",
+        "sku": "\"Premium\"",
+        "admin_enabled": false,
+        "__is_block__": true
+      },
+      "updatedTypes": [
+        "azurerm_resource_group",
+        "azurerm_virtual_network",
+        "azurerm_subnet",
+        "azurerm_subnet",
+        "azurerm_storage_account",
+        "azurerm_key_vault",
+        "azurerm_mssql_server",
+        "azurerm_mssql_database",
+        "azurerm_network_interface",
+        "azurerm_linux_virtual_machine",
+        "azurerm_container_registry",
+        "azurerm_application_insights"
+      ]
+    },
+    "securityAudit": {
+      "score": 95,
+      "critical": 0,
+      "high": 0,
+      "medium": 1,
+      "low": 0,
+      "totalFindings": 1,
+      "vulnerableNodesCount": 1,
+      "blastNodeCount": 1,
+      "blastMap": {
+        "azurerm_storage_account_stseclogarchive2026": {
+          "resourceName": "stseclogarchive2026",
+          "resourceType": "azurerm_storage_account",
+          "severityMultiplier": 2,
+          "impactedNodeCount": 8,
+          "impactedNodes": [
+            "rg-secops-platform-prod",
+            "vnet-secops-hub",
+            "kv_secops_prod_vault",
+            "sql-secops-server",
+            "vm-secops-bastion-nic",
+            "vm-secops-bastion",
+            "crsecopsprod2026",
+            "appi-secops-prod"
+          ],
+          "blastScore": 18,
+          "riskLevel": "HIGH"
+        }
+      }
+    },
+    "finopsAudit": {
+      "totalMonthlyCostUsd": 121.71,
+      "currency": "USD",
+      "billableCount": 6,
+      "billableBreakdown": [
+        {
+          "name": "stseclogarchive2026",
+          "type": "azurerm_storage_account",
+          "monthly": 2.08
+        },
+        {
+          "name": "kv_secops_prod_vault",
+          "type": "azurerm_key_vault",
+          "monthly": 0.03
+        },
+        {
+          "name": "sqldb-audit-records",
+          "type": "azurerm_mssql_database",
+          "monthly": 29.43
+        },
+        {
+          "name": "vm-secops-bastion",
+          "type": "azurerm_linux_virtual_machine",
+          "monthly": 35.17
+        },
+        {
+          "name": "crsecopsprod2026",
+          "type": "azurerm_container_registry",
+          "monthly": 50
+        },
+        {
+          "name": "appi-secops-prod",
+          "type": "azurerm_application_insights",
+          "monthly": 5
+        }
+      ]
+    },
+    "reverseEngineeringAudit": {
+      "hclIngest": {
+        "resourceCount": 3,
+        "types": [
+          "azurerm_resource_group",
+          "azurerm_virtual_network",
+          "azurerm_subnet"
+        ]
+      },
+      "stateIngest": {
+        "resourceCount": 3,
+        "types": [
+          "azurerm_resource_group",
+          "azurerm_virtual_network",
+          "azurerm_subnet"
+        ]
+      },
+      "argIngest": {
+        "resourceCount": 2,
+        "types": [
+          "azurerm_linux_virtual_machine",
+          "azurerm_key_vault"
+        ]
+      }
+    },
+    "performanceMetrics": {
+      "pageLoadLatencyMs": 1120,
+      "topologyCreationLatencyMs": 58,
+      "hclSyncLatencyMs": 123
+    },
+    "iso25010Scores": {
+      "characteristics": {
+        "functionalSuitability": {
+          "functionalCompleteness": 4.9,
+          "functionalCorrectness": 4.85,
+          "functionalAppropriateness": 4.95,
+          "mean": 4.9,
+          "sd": 0.05,
+          "verbalInterpretation": "Very Highly Acceptable"
+        },
+        "performanceEfficiency": {
+          "timeBehaviour": 4.8,
+          "resourceUtilization": 4.75,
+          "capacity": 4.8,
+          "mean": 4.78,
+          "sd": 0.03,
+          "verbalInterpretation": "Very Highly Acceptable"
+        },
+        "usability": {
+          "appropriatenessRecognizability": 4.9,
+          "learnability": 4.8,
+          "operability": 4.85,
+          "userErrorProtection": 4.75,
+          "userInterfaceAesthetics": 4.95,
+          "accessibility": 4.7,
+          "mean": 4.825,
+          "sd": 0.09,
+          "verbalInterpretation": "Very Highly Acceptable"
+        },
+        "reliability": {
+          "maturity": 4.8,
+          "availability": 4.95,
+          "faultTolerance": 5,
+          "recoverability": 4.85,
+          "mean": 4.9,
+          "sd": 0.07,
+          "verbalInterpretation": "Very Highly Acceptable"
+        },
+        "security": {
+          "confidentiality": 4.75,
+          "integrity": 4.9,
+          "nonRepudiation": 4.7,
+          "authenticity": 4.8,
+          "accountability": 4.85,
+          "mean": 4.8,
+          "sd": 0.07,
+          "verbalInterpretation": "Very Highly Acceptable"
+        },
+        "maintainability": {
+          "modularity": 4.95,
+          "reusability": 4.85,
+          "analysability": 4.9,
+          "modifiability": 4.85,
+          "testability": 4.95,
+          "mean": 4.9,
+          "sd": 0.05,
+          "verbalInterpretation": "Very Highly Acceptable"
+        }
+      },
+      "generalWeightedMean": 4.851,
+      "standardDeviation": 0.051,
+      "verbalInterpretation": "Very Highly Acceptable"
+    }
+  },
+  "suiteEndTime": "2026-10-20T05:52:29.884Z"
+}

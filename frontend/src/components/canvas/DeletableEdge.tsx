@@ -15,14 +15,14 @@ export const RELATION_STYLE: Record<
   string,
   { stroke: string; label: string; strokeDash?: string; animated?: boolean }
 > = {
-  // Network Traffic / Flow (Primary Blue)
-  network_traffic: { stroke: '#0C66E4', label: 'Traffic Flow', animated: true },
+  // Network Traffic / Flow (Emerald Green)
+  network_traffic: { stroke: '#1B8A4B', label: 'Traffic Flow', animated: true },
 
   // VNet Peering (Teal)
-  network_peering: { stroke: '#00A3BF', label: 'VNet Peering', animated: true },
-  virtual_network_peering: { stroke: '#00A3BF', label: 'VNet Peering', animated: true },
-  vnet_peering:    { stroke: '#00A3BF', label: 'VNet Peering', animated: true },
-  peering:         { stroke: '#00A3BF', label: 'VNet Peering', animated: true },
+  network_peering: { stroke: '#01B39F', label: 'VNet Peering', animated: true },
+  virtual_network_peering: { stroke: '#01B39F', label: 'VNet Peering', animated: true },
+  vnet_peering:    { stroke: '#01B39F', label: 'VNet Peering', animated: true },
+  peering:         { stroke: '#01B39F', label: 'VNet Peering', animated: true },
 
   // Private Endpoints / Private Links (Green)
   private_endpoint:{ stroke: '#1F845A', label: 'Private Endpoint', animated: true },
@@ -30,24 +30,24 @@ export const RELATION_STYLE: Record<
   data:            { stroke: '#1F845A', label: 'Data Flow', animated: true },
 
   // NSG / Route Association / Security Binding (Amber)
-  security_binding:{ stroke: '#E2B203', label: 'NSG / Security', animated: false, strokeDash: '5,3' },
-  nsg_association: { stroke: '#E2B203', label: 'NSG Rule', animated: false, strokeDash: '5,3' },
-  route_table:     { stroke: '#E2B203', label: 'Route Association', animated: false, strokeDash: '5,3' },
-  network:         { stroke: '#E2B203', label: 'Network Rule', animated: true },
+  security_binding:{ stroke: '#D97706', label: 'NSG / Security', animated: false, strokeDash: '5,3' },
+  nsg_association: { stroke: '#D97706', label: 'NSG Rule', animated: false, strokeDash: '5,3' },
+  route_table:     { stroke: '#D97706', label: 'Route Association', animated: false, strokeDash: '5,3' },
+  network:         { stroke: '#D97706', label: 'Network Rule', animated: true },
 
   // IAM / Managed Identity Role Assignments (Purple)
-  identity:        { stroke: '#8270DB', label: 'IAM / Identity', animated: false, strokeDash: '4,4' },
-  iam:             { stroke: '#8270DB', label: 'IAM Role', animated: false, strokeDash: '4,4' },
-  rbac:            { stroke: '#8270DB', label: 'RBAC Assignment', animated: false, strokeDash: '4,4' },
+  identity:        { stroke: '#A97DE7', label: 'IAM / Identity', animated: false, strokeDash: '4,4' },
+  iam:             { stroke: '#A97DE7', label: 'IAM Role', animated: false, strokeDash: '4,4' },
+  rbac:            { stroke: '#A97DE7', label: 'RBAC Assignment', animated: false, strokeDash: '4,4' },
 
-  // Subnet Association (Blue)
-  subnet_association: { stroke: '#579DFF', label: 'Subnet Attached', animated: false, strokeDash: '4,3' },
+  // Subnet Association (Forest Green)
+  subnet_association: { stroke: '#2B5A43', label: 'Subnet Attached', animated: false, strokeDash: '4,3' },
 
-  // Containment (Subtle Blue dashed)
-  containment:     { stroke: 'rgba(12,102,228,0.45)', label: 'Contains', animated: false, strokeDash: '6,4' },
+  // Containment (Subtle Forest dashed)
+  containment:     { stroke: 'rgba(27,138,75,0.45)', label: 'Contains', animated: false, strokeDash: '6,4' },
 
-  // Default Dependency (Primary Blue)
-  dependency:      { stroke: '#0C66E4', label: 'Depends On', animated: true },
+  // Default Dependency (Emerald Green)
+  dependency:      { stroke: '#1B8A4B', label: 'Depends On', animated: true },
 };
 
 export const getRelationConfig = (relationType?: string) => {
@@ -122,25 +122,27 @@ export const DeletableEdge: React.FC<EdgeProps> = ({
       />
 
       <EdgeLabelRenderer>
-        {/* ── Center Label (Badge) ── */}
-        <div
-          className="nodrag nopan flex items-center px-2 py-0.5 rounded-[3px] shadow pointer-events-none transition-all duration-100"
-          style={{
-            position: 'absolute',
-            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-            background: 'var(--color-surface)',
-            border: `1px solid ${isHovered || selected ? '#CA3521' : strokeColor}55`,
-          }}
-        >
-          <span
-            className="text-[9.5px] font-bold tracking-wide uppercase font-mono"
+        {/* ── Center Label (Badge on hover/selected) ── */}
+        {(isHovered || selected) && (
+          <div
+            className="nodrag nopan flex items-center px-2 py-0.5 rounded-[3px] shadow pointer-events-none transition-all duration-100 animate-fade-in"
             style={{
-              color: isHovered || selected ? '#FD9891' : strokeColor,
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+              background: 'var(--color-surface)',
+              border: `1px solid ${selected ? '#CA3521' : strokeColor}88`,
             }}
           >
-            {relCfg.label}
-          </span>
-        </div>
+            <span
+              className="text-[9.5px] font-bold tracking-wide uppercase font-mono"
+              style={{
+                color: selected ? '#FD9891' : strokeColor,
+              }}
+            >
+              {relCfg.label}
+            </span>
+          </div>
+        )}
 
         {/* ── Side Delete Button at Source Resource Box ── */}
         <div

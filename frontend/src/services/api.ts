@@ -59,6 +59,8 @@ export interface CatalogItem {
   description: string;
 }
 
+import { getAuthHeaders } from './authApi';
+
 const API_BASE = '/api';
 
 export const ApiService = {
@@ -129,10 +131,13 @@ export const ApiService = {
   async generateCopilot(prompt: string, currentTopology?: CanonicalTopologyIR): Promise<CanonicalTopologyIR> {
     const res = await fetch(`${API_BASE}/copilot/generate`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify({ prompt, currentTopology }),
     });
-    if (!res.ok) throw new Error('Failed to run Copilot');
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.detail?.message || err?.detail || 'Failed to run Copilot');
+    }
     const data = await res.json();
     return data.topology;
   },
@@ -145,11 +150,35 @@ export const ApiService = {
   async remediateSecurity(topology: CanonicalTopologyIR, finding: any): Promise<CanonicalTopologyIR> {
     const res = await fetch(`${API_BASE}/copilot/remediate`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify({ topology, finding }),
     });
-    if (!res.ok) throw new Error('Failed to apply remediation');
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.detail?.message || err?.detail || 'Failed to apply remediation');
+    }
     const data = await res.json();
     return data.topology;
   },
+
+  async importState(stateJson: string, projectName: string = 'Imported State'): Promise<CanonicalTopologyIR> {
+    const res = await fetch(`${API_BASE}/import/state`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stateJson, projectName }),
+    });
+    if (!res.ok) throw new Error('Failed to import state file');
+    return res.json();
+  },
+
+  async importAzure(queryResultsJson: string, subscriptionId: string = 'Live Azure Subscription'): Promise<CanonicalTopologyIR> {
+    const res = await fetch(`${API_BASE}/import/azure`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ queryResultsJson, subscriptionId }),
+    });
+    if (!res.ok) throw new Error('Failed to import Azure resources');
+    return res.json();
+  },
 };
+

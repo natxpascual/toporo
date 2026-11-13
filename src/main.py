@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 import argparse
+from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
 import uvicorn
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from src.auth.models import UserRecord
+from src.auth.router import admin_router, auth_router, require_pro_plan
+from src.auth.seed import seed_admin_account
 from src.schema.ir_models import CanonicalTopology
 from src.schema.azure_catalog import get_catalog_list
 from src.codegen.emitter import TerraformEmitter
@@ -19,10 +23,18 @@ from src.security.blast_radius import BlastRadiusAnalyzer
 from src.finops.infracost_client import InfracostClient
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialize startup invariants such as seeding the administrator account."""
+    seed_admin_account()
+    yield
+
+
 app = FastAPI(
     title="Azure Cloud Topology Engine API",
     description="AI-Powered Terraform Visualizer, Checkov Policy Scanner, and FinOps Copilot",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # CORS middleware for web clients
@@ -33,6 +45,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_router)
+app.include_router(admin_router)
 
 
 class ParseRequest(BaseModel):
@@ -129,15 +144,21 @@ class ImportAzureRequest(BaseModel):
 
 
 @app.post("/api/copilot/generate")
-def copilot_generate_architecture(req: CopilotGenerateRequest):
-    """Synthesize complete multi-tier Azure architecture from natural language."""
+def copilot_generate_architecture(
+    req: CopilotGenerateRequest,
+    _pro_user: UserRecord = Depends(require_pro_plan),
+):
+    """Synthesize complete multi-tier Azure architecture from natural language (Toporo Pro)."""
     topology = ArchitectureCopilot.generate_topology_from_prompt(req.prompt, req.currentTopology)
     return {"topology": topology}
 
 
 @app.post("/api/copilot/remediate")
-def copilot_remediate_finding(req: CopilotRemediateRequest):
-    """Apply 1-click automated remediation for Checkov policy findings."""
+def copilot_remediate_finding(
+    req: CopilotRemediateRequest,
+    _pro_user: UserRecord = Depends(require_pro_plan),
+):
+    """Apply 1-click automated remediation for Checkov policy findings (Toporo Pro)."""
     resource_id = req.finding.get("resourceId") or req.finding.get("resource_id", "")
     rule_id = req.finding.get("ruleId") or req.finding.get("rule_id", "")
     remediated = SecurityRemediator.remediate_finding(req.topology, resource_id, rule_id)

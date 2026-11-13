@@ -1,208 +1,260 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Header } from './components/header/Header';
-import { ResourceCatalog } from './components/sidebar/ResourceCatalog';
-import { Canvas } from './components/canvas/Canvas';
-import { MonacoEditor } from './components/editor/MonacoEditor';
-import { PropertyInspector } from './components/inspector/PropertyInspector';
-import { CopilotModal } from './components/copilot/CopilotModal';
-import { ImportModal } from './components/import/ImportModal';
-import { useTopologyStore } from './store/useTopologyStore';
-import { GripVertical } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { BrandSite } from './components/brandsite/BrandSite';
+import { SignupPage } from './components/auth/SignupPage';
+import { LoginPage } from './components/auth/LoginPage';
+import { TopologyStudio } from './components/studio/TopologyStudio';
+import { AdminPortal } from './components/admin/AdminPortal';
+import { TermsPage } from './components/legal/TermsPage';
+import { PrivacyPage } from './components/legal/PrivacyPage';
+import { CookiePolicyPage } from './components/legal/CookiePolicyPage';
+import { AccessibilityPage } from './components/legal/AccessibilityPage';
+import { useAuthStore } from './store/useAuthStore';
 
-// ─── Status Bar ────────────────────────────────────────────────────────────
+export type AppRoute =
+  | '/'
+  | '/signup'
+  | '/login'
+  | '/studio'
+  | '/manage'
+  | '/terms'
+  | '/privacy'
+  | '/cookies'
+  | '/accessibility';
 
-const StatusBar: React.FC<{ resourceCount: number; edgeCount: number }> = ({ resourceCount, edgeCount }) => (
-  <div
-    className="flex items-center justify-between px-3 h-[24px] shrink-0 text-[11px] select-none"
-    style={{
-      background:  'var(--color-surface)',
-      borderTop:   '1px solid var(--color-border)',
-      color:       'var(--color-text-muted)',
-    }}
-  >
-    <div className="flex items-center gap-3">
-      <span className="flex items-center gap-1.5 font-medium">
-        <span
-          className="status-dot synced"
-          style={{ width: 6, height: 6 }}
-        />
-        Topology Studio Connected
-      </span>
-      <span className="text-[var(--color-border)]">|</span>
-      <span>{resourceCount} resource{resourceCount !== 1 ? 's' : ''}</span>
-      {edgeCount > 0 && <span>· {edgeCount} connections</span>}
-    </div>
-    <div className="flex items-center gap-3 font-mono text-[10px]">
-      <span>Azure Cloud Infra</span>
-      <span className="px-1 py-0.2 rounded bg-[var(--color-surface-2)] text-[var(--color-primary-light)] font-bold">
-        v2.5
-      </span>
-    </div>
-  </div>
-);
+export function normalizeRoute(raw: string): AppRoute {
+  const trimmed = (raw || '').trim();
+  if (!trimmed || trimmed === '/' || trimmed === '#') return '/';
 
-// ─── App Root ─────────────────────────────────────────────────────────────
+  // Strip protocol and host if present
+  const clean = trimmed.toLowerCase().replace(/^[a-z]+:\/\/[^/]+/i, '');
+
+  // Split into path and hash, ignoring query strings on route match
+  const [pathWithQuery, hashWithQuery] = clean.split('#');
+  const pathPart = (pathWithQuery || '').split('?')[0];
+  const hashPart = (hashWithQuery || '').split('?')[0];
+
+  // Check pathname first
+  const pathClean = (pathPart || '').replace(/^\/+/, '').split('/')[0];
+  if (pathClean === 'signup') return '/signup';
+  if (pathClean === 'login') return '/login';
+  if (pathClean === 'studio') return '/studio';
+  if (pathClean === 'manage') return '/manage';
+  if (pathClean === 'terms') return '/terms';
+  if (pathClean === 'privacy') return '/privacy';
+  if (pathClean === 'cookies') return '/cookies';
+  if (pathClean === 'accessibility') return '/accessibility';
+
+  // If path is root or empty, check hash for standalone page route vs in-page anchor
+  if (hashPart) {
+    const hashClean = hashPart.replace(/^\/+/, '').split('/')[0];
+    if (hashClean === 'signup') return '/signup';
+    if (hashClean === 'login') return '/login';
+    if (hashClean === 'studio') return '/studio';
+    if (hashClean === 'manage') return '/manage';
+    if (hashClean === 'terms') return '/terms';
+    if (hashClean === 'privacy') return '/privacy';
+    if (hashClean === 'cookies') return '/cookies';
+    if (hashClean === 'accessibility') return '/accessibility';
+    // All in-page anchors (e.g. 'visual-studio', 'code-inspector', 'ai-copilot', etc.) belong to homepage ('/')
+    return '/';
+  }
+
+  return '/';
+}
+
+function getInitialRoute(): AppRoute {
+  if (typeof window === 'undefined') return '/';
+  const fromHash = window.location.hash ? normalizeRoute(window.location.hash) : null;
+  if (fromHash && fromHash !== '/') return fromHash;
+  return normalizeRoute(window.location.pathname);
+}
 
 export const App: React.FC = () => {
-  const [isSplitView, setIsSplitView] = useState<boolean>(false);
-  const [codeDrawerWidth, setCodeDrawerWidth] = useState<number>(() => {
-    const saved = localStorage.getItem('azure_code_drawer_width');
-    if (saved) {
-      const parsed = parseInt(saved, 10);
-      if (!isNaN(parsed) && parsed >= 260 && parsed <= 1400) return parsed;
-    }
-    return Math.max(340, Math.min(600, Math.round(window.innerWidth * 0.38)));
-  });
-  const [isDraggingDrawer, setIsDraggingDrawer] = useState(false);
-  const editorContainerRef = useRef<HTMLDivElement | null>(null);
+  const [currentRoute, setCurrentRoute] = useState<AppRoute>(getInitialRoute);
+  const [postLoginRoute, setPostLoginRoute] = useState<string>('/studio');
 
   const {
-    refreshCodeAndAnalysis,
-    topology,
-    toggleCopilot,
-    openImport,
-    toggleInspector,
-    toggleMiniMap,
-  } = useTopologyStore() as any;
+    user,
+    token,
+    isElevatedAdminSession,
+    isAuthReady,
+    initializeSession,
+    applyOAuthToken,
+  } = useAuthStore();
+
+  const isAuthenticated = Boolean(token && user && user.emailVerified && user.status === 'active');
+
+  const navigate = useCallback(
+    (targetRoute: string) => {
+      // If target is an in-page anchor on the homepage (starts with '#')
+      if (targetRoute.startsWith('#')) {
+        const anchorId = targetRoute.replace(/^#/, '');
+        if (currentRoute !== '/') {
+          setCurrentRoute('/');
+          window.history.pushState({}, '', `/#${anchorId}`);
+          setTimeout(() => {
+            document.getElementById(anchorId)?.scrollIntoView({ behavior: 'smooth' });
+          }, 100);
+        } else {
+          window.history.pushState({}, '', `/#${anchorId}`);
+          document.getElementById(anchorId)?.scrollIntoView({ behavior: 'smooth' });
+        }
+        return;
+      }
+
+      const next = normalizeRoute(targetRoute);
+      const hasQuery = targetRoute.includes('?');
+      const urlToPush = hasQuery ? targetRoute : next === '/' ? '/' : next;
+
+      setCurrentRoute(next);
+
+      try {
+        if (window.history && window.history.pushState) {
+          window.history.pushState({}, '', urlToPush);
+        }
+        if (!hasQuery) {
+          window.location.hash = next === '/' ? '' : next;
+        }
+      } catch {
+        window.location.hash = next;
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [currentRoute]
+  );
+
+  // Initialize session & handle OAuth callback hash on mount
+  useEffect(() => {
+    const hash = window.location.hash || '';
+    if (hash.startsWith('#oauth-callback')) {
+      const queryPart = hash.split('?')[1] || '';
+      const params = new URLSearchParams(queryPart);
+      const oauthToken = params.get('token');
+      const elevated = params.get('elevated') === '1';
+      if (oauthToken) {
+        applyOAuthToken(oauthToken, elevated).then((authedUser) => {
+          if (authedUser) {
+            navigate(elevated && authedUser.role === 'admin' ? '/manage' : '/studio');
+          } else {
+            navigate('/login');
+          }
+        });
+        return;
+      }
+    }
+    initializeSession();
+  }, [applyOAuthToken, initializeSession, navigate]);
+
+  // Enforce strict route guards for /studio and /manage once auth hydration completes
+  useEffect(() => {
+    if (!isAuthReady) return;
+
+    if (currentRoute === '/studio' && !isAuthenticated) {
+      setPostLoginRoute('/studio');
+      navigate('/login');
+      return;
+    }
+
+    if (currentRoute === '/manage') {
+      const canAccessManage = isAuthenticated && user?.role === 'admin' && isElevatedAdminSession;
+      if (!canAccessManage) {
+        // Redirect strictly to plain /login without exposing ?session=elevate
+        navigate('/login');
+      }
+    }
+  }, [currentRoute, isAuthReady, isAuthenticated, user, isElevatedAdminSession, navigate]);
 
   useEffect(() => {
-    refreshCodeAndAnalysis?.();
-  }, [refreshCodeAndAnalysis]);
-
-  // Persist code drawer width
-  useEffect(() => {
-    localStorage.setItem('azure_code_drawer_width', String(codeDrawerWidth));
-  }, [codeDrawerWidth]);
-
-  // ── Horizontal Resizer Drag Handling ──
-  const handleStartResize = useCallback((e: React.PointerEvent) => {
-    e.preventDefault();
-    setIsDraggingDrawer(true);
-    const startX = e.clientX;
-    const startW = editorContainerRef.current
-      ? editorContainerRef.current.getBoundingClientRect().width
-      : codeDrawerWidth;
-
-    const onPointerMove = (moveEvent: PointerEvent) => {
-      moveEvent.preventDefault();
-      // Dragging left increases editor drawer width
-      const deltaX = startX - moveEvent.clientX;
-      const minW = 280;
-      const maxW = Math.max(minW, window.innerWidth - 320);
-      const newW = Math.max(minW, Math.min(maxW, startW + deltaX));
-      setCodeDrawerWidth(newW);
+    const handleLocationChange = () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const routeFromHash = normalizeRoute(hash);
+        if (routeFromHash !== '/') {
+          setCurrentRoute(routeFromHash);
+        } else {
+          setCurrentRoute('/');
+          const targetId = hash.replace(/^#\/?/, '');
+          if (targetId && !targetId.startsWith('oauth-callback')) {
+            setTimeout(() => {
+              document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
+            }, 80);
+          }
+        }
+      } else {
+        setCurrentRoute(normalizeRoute(window.location.pathname));
+      }
     };
 
-    const onPointerUp = () => {
-      setIsDraggingDrawer(false);
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+
+    if (window.location.hash) {
+      const anchor = window.location.hash.replace(/^#\/?/, '');
+      if (
+        anchor &&
+        !anchor.startsWith('oauth-callback') &&
+        !['studio', 'manage', 'login', 'signup', 'terms', 'privacy', 'cookies', 'accessibility'].includes(anchor)
+      ) {
+        setTimeout(() => {
+          document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      }
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
     };
-
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
-  }, [codeDrawerWidth]);
-
-  const handleResetDrawerWidth = useCallback(() => {
-    const defaultW = Math.max(340, Math.min(600, Math.round(window.innerWidth * 0.38)));
-    setCodeDrawerWidth(defaultW);
   }, []);
 
-  // ── Global keyboard shortcuts ──
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    const isInput = ['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName) ||
-      (e.target as HTMLElement)?.isContentEditable;
-    if (isInput) return;
-
-    const ctrl = e.metaKey || e.ctrlKey;
-
-    // ⌘/ → AI Copilot
-    if (ctrl && e.key === '/') {
-      e.preventDefault();
-      toggleCopilot?.(true);
-    }
-    // ⌘\ → Toggle split view
-    if (ctrl && e.key === '\\') {
-      e.preventDefault();
-      setIsSplitView(p => !p);
-    }
-    // 'I' or 'i' (or ⌘I) → Toggle Property Inspector
-    if ((e.key === 'i' || e.key === 'I') && !e.shiftKey && !e.altKey && !ctrl) {
-      e.preventDefault();
-      toggleInspector?.();
-    }
-    // 'M' or 'm' → Toggle Mini-Map
-    if ((e.key === 'm' || e.key === 'M') && !e.shiftKey && !e.altKey && !ctrl) {
-      e.preventDefault();
-      toggleMiniMap?.();
-    }
-  }, [toggleCopilot, toggleInspector, toggleMiniMap]);
-
+  // Expose router to window for automated testing and verification
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
+    (window as any).__APP_ROUTER__ = {
+      currentRoute,
+      navigate,
+    };
+  }, [currentRoute, navigate]);
 
-  const resourceCount = topology?.resources?.length ?? 0;
-  const edgeCount     = topology?.edges?.length ?? 0;
-
-  return (
-    <div
-      className={`flex flex-col h-screen w-screen overflow-hidden ${isDraggingDrawer ? 'select-none' : ''}`}
-      style={{ background: 'var(--color-bg)', color: 'var(--color-text-primary)' }}
-    >
-      {/* ── Top Application Bar ── */}
-      <Header
-        isSplitView={isSplitView}
-        toggleSplitView={() => setIsSplitView(p => !p)}
-      />
-
-      {/* ── Main Studio Viewport ── */}
-      <div className="flex-1 flex overflow-hidden relative">
-        {/* Left Sidebar — Azure Resource Catalog */}
-        <ResourceCatalog />
-
-        {/* Center — Visual Canvas */}
-        <main className="flex-1 h-full relative overflow-hidden" style={{ background: 'var(--color-bg)' }}>
-          <Canvas />
-        </main>
-
-        {/* Resizable Split — Monaco HCL Editor */}
-        {isSplitView && (
-          <>
-            {/* Draggable resize handle */}
-            <div
-              className={`drawer-resizer ${isDraggingDrawer ? 'resizing' : ''}`}
-              onPointerDown={handleStartResize}
-              onDoubleClick={handleResetDrawerWidth}
-              title="Drag to resize code drawer horizontally (Double-click to reset)"
-            >
-              <div className="drawer-resizer-handle">
-                <GripVertical className="w-2.5 h-2.5 text-[var(--color-text-muted)]" />
-              </div>
-            </div>
-
-            {/* Monaco Editor Container */}
-            <div
-              ref={editorContainerRef}
-              className="h-full shrink-0 relative"
-              style={{ width: `${codeDrawerWidth}px`, minWidth: 280, maxWidth: 'calc(100vw - 320px)' }}
-            >
-              <MonacoEditor />
-            </div>
-          </>
-        )}
-
-        {/* Right — Property Inspector */}
-        <PropertyInspector />
+  // Wait for initial session check before rendering protected routes
+  if (!isAuthReady && (currentRoute === '/studio' || currentRoute === '/manage')) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#121613] text-[#F5F5F4] font-mono text-xs">
+        Verifying Toporo session...
       </div>
+    );
+  }
 
-      {/* ── Status Bar ── */}
-      <StatusBar resourceCount={resourceCount} edgeCount={edgeCount} />
-
-      {/* ── Modals & Overlays ── */}
-      <CopilotModal />
-      <ImportModal />
-    </div>
-  );
+  switch (currentRoute) {
+    case '/signup':
+      return <SignupPage onNavigate={navigate} onSuccess={() => navigate('/studio')} />;
+    case '/login':
+      return (
+        <LoginPage
+          onNavigate={navigate}
+          onSuccess={(opts) => navigate(opts?.elevated ? '/manage' : postLoginRoute || '/studio')}
+        />
+      );
+    case '/studio':
+      if (!isAuthenticated) {
+        return <LoginPage onNavigate={navigate} onSuccess={() => navigate('/studio')} />;
+      }
+      return <TopologyStudio onNavigate={navigate} />;
+    case '/manage':
+      if (!isAuthenticated || user?.role !== 'admin' || !isElevatedAdminSession) {
+        return <LoginPage onNavigate={navigate} onSuccess={(opts) => navigate(opts?.elevated ? '/manage' : '/studio')} />;
+      }
+      return <AdminPortal onNavigate={navigate} />;
+    case '/terms':
+      return <TermsPage onNavigate={navigate} />;
+    case '/privacy':
+      return <PrivacyPage onNavigate={navigate} />;
+    case '/cookies':
+      return <CookiePolicyPage onNavigate={navigate} />;
+    case '/accessibility':
+      return <AccessibilityPage onNavigate={navigate} />;
+    case '/':
+    default:
+      return <BrandSite onNavigate={navigate} />;
+  }
 };

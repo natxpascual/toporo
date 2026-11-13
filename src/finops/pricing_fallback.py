@@ -69,10 +69,77 @@ AZURE_RETAIL_PRICE_TABLE: Dict[str, Dict[str, float]] = {
         "Standard_v2": 175.20,
         "default": 248.20,
     },
+    "azurerm_firewall": {
+        "AZFW_VNet": 912.50,
+        "default": 912.50,
+    },
+    "azurerm_redis_cache": {
+        "Basic": 16.06,
+        "Standard": 54.75,
+        "Premium": 204.40,
+        "default": 54.75,
+    },
+    "azurerm_container_registry": {
+        "Basic": 5.00,
+        "Standard": 20.00,
+        "Premium": 50.00,
+        "default": 50.00,
+    },
+    "azurerm_bastion_host": {
+        "Basic": 138.70,
+        "Standard": 211.70,
+        "default": 211.70,
+    },
+    "azurerm_nat_gateway": {
+        "default": 32.85,
+    },
+    "azurerm_public_ip": {
+        "default": 3.65,
+    },
+    "azurerm_postgresql_flexible_server": {
+        "B_Standard_B1ms": 14.60,
+        "B_Standard_B2s": 29.20,
+        "default": 29.20,
+    },
+    "azurerm_mysql_flexible_server": {
+        "B_Standard_B1ms": 14.60,
+        "B_Standard_B2s": 29.20,
+        "default": 29.20,
+    },
+    "azurerm_log_analytics_workspace": {
+        "default": 6.90,
+    },
+    "azurerm_application_insights": {
+        "default": 5.00,
+    },
+    "azurerm_cognitive_account": {
+        "S0": 20.00,
+        "default": 20.00,
+    },
+    "azurerm_servicebus_namespace": {
+        "Basic": 0.05,
+        "Standard": 10.00,
+        "Premium": 677.00,
+        "default": 10.00,
+    },
+    "azurerm_eventhub_namespace": {
+        "Basic": 11.00,
+        "Standard": 22.00,
+        "default": 22.00,
+    },
+    "azurerm_api_management": {
+        "Developer_1": 48.00,
+        "Standard_1": 680.00,
+        "default": 48.00,
+    },
     "azurerm_resource_group": {"default": 0.0},
     "azurerm_virtual_network": {"default": 0.0},
     "azurerm_subnet": {"default": 0.0},
     "azurerm_network_security_group": {"default": 0.0},
+    "azurerm_route_table": {"default": 0.0},
+    "azurerm_private_dns_zone": {"default": 0.50},
+    "azurerm_dns_zone": {"default": 0.50},
+    "azurerm_private_endpoint": {"default": 7.30},
 }
 
 

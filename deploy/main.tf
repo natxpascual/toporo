@@ -44,7 +44,7 @@ resource "azurerm_container_registry" "acr" {
   name                = replace("${var.prefix}acr01", "-", "")
   resource_group_name = azurerm_resource_group.rg_platform.name
   location            = azurerm_resource_group.rg_platform.location
-  sku                 = "Standard"
+  sku                 = var.acr_sku
   admin_enabled       = true
   tags                = var.tags
 }
@@ -66,7 +66,7 @@ resource "azurerm_service_plan" "asp_frontend" {
   resource_group_name = azurerm_resource_group.rg_platform.name
   location            = azurerm_resource_group.rg_platform.location
   os_type             = "Linux"
-  sku_name            = "P1v3"
+  sku_name            = var.app_service_sku
   tags                = var.tags
 }
 
@@ -142,6 +142,7 @@ resource "azurerm_linux_function_app" "api_function" {
     "AzureWebJobsFeatureFlags"              = "EnableWorkerIndexing"
     "APPINSIGHTS_INSTRUMENTATIONKEY"        = azurerm_application_insights.appinsights.instrumentation_key
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.appinsights.connection_string
+    "AZURE_OPENAI_MODEL"                    = "gpt-4o-mini"
   }
 
   tags = var.tags

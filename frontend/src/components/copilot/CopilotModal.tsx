@@ -11,27 +11,27 @@ const EXAMPLE_PROMPTS = [
   {
     label: '3-Tier Web App',
     prompt: 'Create a 3-tier web architecture with Azure App Service, Azure SQL Database, and Redis Cache, all secured with a Key Vault and private endpoints.',
-    color: '#0C66E4',
+    color: '#1B8A4B',
   },
   {
     label: 'AKS + Cosmos DB',
     prompt: 'Design a microservices architecture using AKS cluster connected to Cosmos DB and Azure Service Bus for event-driven communication, with a managed identity.',
-    color: '#0052CC',
+    color: '#01B39F',
   },
   {
     label: 'Hub & Spoke Network',
     prompt: 'Build a hub and spoke network topology with a central hub VNet containing an Azure Firewall, and two spoke VNets for workloads peered to the hub.',
-    color: '#1F845A',
+    color: '#2B5A43',
   },
   {
     label: 'OpenAI Workload',
     prompt: 'Set up an Azure OpenAI workload with a Function App as the API layer, Storage Account for blob data, Key Vault for secrets, and User Assigned Identity.',
-    color: '#E34935',
+    color: '#A97DE7',
   },
   {
     label: 'Secure Landing Zone',
     prompt: 'Create a secure Azure landing zone with Application Gateway with WAF, NSGs on all subnets, private endpoints for all PaaS services, and Key Vault.',
-    color: '#E2B203',
+    color: '#D97706',
   },
 ];
 
@@ -163,7 +163,7 @@ export const CopilotModal: React.FC = () => {
         >
           <div className="flex items-center gap-2.5">
             <div
-              className="w-7 h-7 rounded-[3px] flex items-center justify-center bg-[var(--color-primary)] text-white shadow-sm"
+              className="w-7 h-7 rounded-[3px] flex items-center justify-center bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-sm"
             >
               <Sparkles className="w-4 h-4" />
             </div>
@@ -221,7 +221,7 @@ export const CopilotModal: React.FC = () => {
               <div
                 className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[10px] font-bold"
                 style={msg.role === 'assistant'
-                  ? { background: 'var(--color-primary)', color: 'white' }
+                  ? { background: 'var(--color-primary)', color: 'var(--color-on-primary)' }
                   : { background: 'var(--color-surface-3)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }
                 }
               >

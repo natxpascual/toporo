@@ -6,7 +6,7 @@ import {
   Pencil,
 } from 'lucide-react';
 import { AzureResourceIR } from '../../services/api';
-import { AzureIcon, getAzureColor } from '../icons/AzureIcons';
+import { AzureIcon, getAzureColor, getFriendlyTypeName } from '../icons/AzureIcons';
 import { useTopologyStore } from '../../store/useTopologyStore';
 
 // ─── Security severity helpers ────────────────────────────────────────────
@@ -365,10 +365,10 @@ export const AzureNode = memo(({ data, selected }: NodeProps & { data: AzureNode
             </div>
           )}
           <div
-            className="text-[9.5px] text-[var(--color-text-muted)] font-mono truncate mt-0.5"
+            className="text-[10px] text-[var(--color-text-muted)] font-medium truncate mt-0.5"
             title={res.type}
           >
-            {res.type.replace('azurerm_', '')}
+            {getFriendlyTypeName(res.type)}
           </div>
         </div>
 
@@ -384,8 +384,8 @@ export const AzureNode = memo(({ data, selected }: NodeProps & { data: AzureNode
       style={{
         width: `${width}px`,
         height: height ? `${height}px` : undefined,
-        minWidth: 220,
-        minHeight: 120,
+        minWidth: 200,
+        minHeight: 88,
         transition: isResizing ? 'none' : undefined,
       }}
       onMouseEnter={() => setHoveredResource(res.id)}
@@ -398,8 +398,8 @@ export const AzureNode = memo(({ data, selected }: NodeProps & { data: AzureNode
       {/* ── Sizing Box Handles ── */}
       <NodeResizer
         isVisible={selected}
-        minWidth={220}
-        minHeight={120}
+        minWidth={200}
+        minHeight={88}
         handleStyle={{
           width: 7,
           height: 7,
@@ -588,9 +588,10 @@ export const AzureNode = memo(({ data, selected }: NodeProps & { data: AzureNode
                   </div>
                 )}
                 <div
-                  className="text-[10px] truncate text-[var(--color-text-muted)] font-mono"
+                  className="text-[10px] truncate text-[var(--color-text-muted)] font-medium"
+                  title={res.type}
                 >
-                  {res.type.replace('azurerm_', '')}
+                  {getFriendlyTypeName(res.type)}
                 </div>
               </div>
             </div>
@@ -608,49 +609,17 @@ export const AzureNode = memo(({ data, selected }: NodeProps & { data: AzureNode
             ) : null}
           </div>
 
-          {/* ── Containment Ancestry Breadcrumb ── */}
-          {ancestors.length > 0 && (
-            <div
-              className="mb-2 px-1.5 py-0.5 rounded-[3px] text-[10px] font-medium flex items-center flex-wrap gap-1 bg-[var(--color-surface-2)] border border-[var(--color-border)]"
-            >
-              <Layers className="w-2.5 h-2.5 shrink-0 text-[var(--color-primary-light)]" />
-              {ancestors.map((anc, idx) => (
-                <React.Fragment key={anc.id}>
-                  {idx > 0 && (
-                    <ChevronRight className="w-2.5 h-2.5 text-[var(--color-text-muted)] shrink-0" />
-                  )}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      selectResource(anc.id);
-                    }}
-                    className="hover:underline hover:text-[var(--color-primary-light)] transition-colors truncate max-w-[80px] text-[var(--color-text-secondary)]"
-                    title={`Parent ${anc.container_level?.toUpperCase()}: ${anc.name}`}
-                  >
-                    {anc.name}
-                  </button>
-                </React.Fragment>
-              ))}
-            </div>
-          )}
-
-          {/* ── Property preview ── */}
+          {/* ── Concise Spec Summary ── */}
           {propEntries.length > 0 && (
             <div
-              className="mb-2 p-1.5 rounded-[var(--radius-sm)] space-y-0.5 bg-[var(--color-surface-2)] border border-[var(--color-border)]"
+              className="mb-1.5 px-2 py-0.5 rounded-[var(--radius-sm)] flex items-center justify-between text-[10px] bg-[var(--color-surface-2)] border border-[var(--color-border)]"
             >
-              {propEntries.map(([k, v]) => (
-                <div key={k} className="flex items-center justify-between gap-2">
-                  <span className="text-[9px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
-                    {k.replace(/_/g, ' ')}
-                  </span>
-                  <span
-                    className="text-[10px] font-medium truncate max-w-[105px] font-mono text-[var(--color-text-secondary)]"
-                  >
-                    {String(v)}
-                  </span>
-                </div>
-              ))}
+              <span className="text-[9px] uppercase tracking-wider text-[var(--color-text-muted)] font-semibold truncate">
+                {propEntries[0][0].replace(/_/g, ' ')}
+              </span>
+              <span className="text-[10px] font-medium text-[var(--color-text-secondary)] truncate max-w-[110px]">
+                {String(propEntries[0][1])}
+              </span>
             </div>
           )}
 

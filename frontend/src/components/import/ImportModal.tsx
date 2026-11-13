@@ -1,19 +1,20 @@
 import React, { useState, useRef, useCallback } from 'react';
 import {
-  X, Upload, FileCode, Clipboard, Cloud, Layers,
+  X, Upload, FileCode, Clipboard, FileBox, Layers,
   CheckCircle2, AlertCircle, Loader2, ChevronRight,
 } from 'lucide-react';
 import { useTopologyStore } from '../../store/useTopologyStore';
+import { CanonicalTopologyIR } from '../../services/api';
 
 // ─── Import method config ─────────────────────────────────────────────────
 
-type ImportMethod = 'upload' | 'paste' | 'azure' | 'sample';
+type ImportMethod = 'project' | 'upload' | 'paste' | 'sample';
 
 const METHODS: { id: ImportMethod; icon: React.ElementType; label: string; desc: string; color: string }[] = [
-  { id: 'upload', icon: Upload,   label: 'Upload files',        desc: '.tf / .tfstate / tfplan.json',   color: '#0C66E4' },
-  { id: 'paste',  icon: Clipboard,label: 'Paste HCL',           desc: 'Paste raw Terraform HCL',         color: '#0052CC' },
-  { id: 'azure',  icon: Cloud,    label: 'Azure Subscription',   desc: 'Connect via subscription ID',      color: '#0078D4' },
-  { id: 'sample', icon: Layers,   label: 'Sample Architecture',  desc: 'Load a pre-built example',         color: '#1F845A' },
+  { id: 'project', icon: FileBox,   label: 'Import Project File', desc: 'Accepts .ats files only',         color: '#1B8A4B' },
+  { id: 'upload',  icon: Upload,    label: 'Upload files',        desc: '.tf / .tfstate / tfplan.json',    color: '#2B5A43' },
+  { id: 'paste',   icon: Clipboard, label: 'Paste HCL',           desc: 'Paste raw Terraform HCL',         color: '#01B39F' },
+  { id: 'sample',  icon: Layers,    label: 'Sample Architecture',  desc: 'Load a pre-built example',       color: '#1F845A' },
 ];
 
 const SAMPLES = [
@@ -23,14 +24,15 @@ const SAMPLES = [
   { id: 'ai-workload', label: 'AI / OpenAI Workload',   resources: 7  },
 ];
 
-// ─── Drag-drop zone (ADS Style) ───────────────────────────────────────────
+// ─── Drag-drop zone ───────────────────────────────────────────────────────
 
 const DropZone: React.FC<{
   onFiles: (files: File[]) => void;
   accept: string;
   status: 'idle' | 'loading' | 'success' | 'error';
   errorMsg?: string;
-}> = ({ onFiles, accept, status, errorMsg }) => {
+  helperText?: string;
+}> = ({ onFiles, accept, status, errorMsg, helperText }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -68,7 +70,6 @@ const DropZone: React.FC<{
         ref={inputRef}
         type="file"
         accept={accept}
-        multiple
         className="hidden"
         onChange={e => { if (e.target.files?.length) onFiles(Array.from(e.target.files)); }}
       />
@@ -81,10 +82,10 @@ const DropZone: React.FC<{
 
       <div className="text-center">
         <div className="text-[12.5px] font-semibold text-[var(--color-text-primary)]">
-          {status === 'success' ? 'Import successful!' : status === 'error' ? 'Import failed' : 'Drop files here or click to browse'}
+          {status === 'success' ? 'Import successful!' : status === 'error' ? 'Import failed' : 'Drop file here or click to browse'}
         </div>
         <div className="text-[11px] mt-0.5 text-[var(--color-text-muted)]">
-          {status === 'error' ? errorMsg : 'Supports .tf, .tfstate, and tfplan.json files'}
+          {status === 'error' ? errorMsg : (helperText || 'Supports .tf, .tfstate, and tfplan.json files')}
         </div>
       </div>
     </div>
@@ -94,23 +95,56 @@ const DropZone: React.FC<{
 // ─── Import Modal ─────────────────────────────────────────────────────────
 
 export const ImportModal: React.FC = () => {
-  const { isImportOpen, closeImport, importFromHcl, loadSample } = useTopologyStore() as any;
-  const [method, setMethod] = useState<ImportMethod>('upload');
+  const { isImportOpen, closeImport, importFromHcl, importFromState, importFromAzure, loadSample, loadTemplate, markSaved } = useTopologyStore() as any;
+  const [method, setMethod] = useState<ImportMethod>('project');
   const [pasteValue, setPasteValue] = useState('');
-  const [subId, setSubId]     = useState('');
-  const [authMethod, setAuthMethod] = useState('service-principal');
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [uploadError, setUploadError] = useState('');
 
+  const [projectStatus, setProjectStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [projectError, setProjectError] = useState('');
+
   if (!isImportOpen) return null;
+
+  const handleProjectFiles = async (files: File[]) => {
+    setProjectStatus('loading');
+    setProjectError('');
+    try {
+      const file = files[0];
+      if (!file) throw new Error('No file selected');
+      if (!file.name.toLowerCase().endsWith('.ats')) {
+        throw new Error('Only .ats files are accepted.');
+      }
+      const content = await file.text();
+      const parsed: CanonicalTopologyIR = JSON.parse(content);
+      if (!parsed || !Array.isArray(parsed.resources)) {
+        throw new Error('Invalid .ats format: missing resources array in project topology.');
+      }
+
+      await loadTemplate(parsed);
+      markSaved?.(true);
+      setProjectStatus('success');
+      setTimeout(() => closeImport?.(), 600);
+    } catch (e: any) {
+      setProjectStatus('error');
+      setProjectError(e.message ?? 'Failed to parse .ats file');
+    }
+  };
 
   const handleFiles = async (files: File[]) => {
     setUploadStatus('loading');
     try {
-      const tfFile = files.find(f => f.name.endsWith('.tf') || f.name.endsWith('.tfstate') || f.name.endsWith('.json'));
-      if (!tfFile) throw new Error('No supported file format found');
-      const content = await tfFile.text();
-      await importFromHcl?.(content);
+      const file = files.find(f => f.name.endsWith('.tf') || f.name.endsWith('.tfstate') || f.name.endsWith('.json'));
+      if (!file) throw new Error('No supported file format found (.tf, .tfstate, .json)');
+      const content = await file.text();
+
+      if (file.name.endsWith('.tfstate') || (file.name.endsWith('.json') && (content.includes('"terraform_version"') || content.includes('"serial"') || content.includes('"resources"')))) {
+        await importFromState?.(content, file.name.replace(/\.[^/.]+$/, ''));
+      } else if (file.name.endsWith('.json') && (content.includes('Microsoft.') || content.includes('microsoft.'))) {
+        await importFromAzure?.(content, 'Imported Azure Resources');
+      } else {
+        await importFromHcl?.(content);
+      }
       setUploadStatus('success');
       setTimeout(() => closeImport?.(), 800);
     } catch (e: any) {
@@ -122,9 +156,18 @@ export const ImportModal: React.FC = () => {
   const handlePasteImport = async () => {
     if (!pasteValue.trim()) return;
     try {
-      await importFromHcl?.(pasteValue);
+      const trimmed = pasteValue.trim();
+      if (trimmed.startsWith('{') && (trimmed.includes('"terraform_version"') || trimmed.includes('"resources"'))) {
+        await importFromState?.(trimmed, 'Imported State');
+      } else if (trimmed.startsWith('[') && (trimmed.includes('Microsoft.') || trimmed.includes('microsoft.'))) {
+        await importFromAzure?.(trimmed, 'Imported Azure Resources');
+      } else {
+        await importFromHcl?.(trimmed);
+      }
       closeImport?.();
-    } catch {}
+    } catch (err: any) {
+      alert(`Import failed: ${err.message}`);
+    }
   };
 
   const handleSampleLoad = (id: string) => {
@@ -159,7 +202,7 @@ export const ImportModal: React.FC = () => {
               Import Infrastructure
             </h2>
             <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
-              Load Terraform configuration or connect an Azure subscription
+              Load an existing Project File (.ats) or Terraform configuration
             </p>
           </div>
           <button
@@ -199,6 +242,21 @@ export const ImportModal: React.FC = () => {
 
         {/* Method content */}
         <div className="px-5 py-4">
+          {method === 'project' && (
+            <div className="space-y-3">
+              <DropZone
+                onFiles={handleProjectFiles}
+                accept=".ats"
+                status={projectStatus}
+                errorMsg={projectError}
+                helperText="Drop your exported .ats project file here (Only .ats files are accepted)"
+              />
+              <div className="p-2.5 rounded-[var(--radius-sm)] text-[11px] bg-[var(--color-surface-2)] border border-[var(--color-border)] text-[var(--color-text-secondary)]">
+                💡 <strong className="text-[var(--color-text-primary)]">Project File (.ats)</strong> contains your full architecture canvas, containers, resources, and custom parameters.
+              </div>
+            </div>
+          )}
+
           {method === 'upload' && (
             <DropZone
               onFiles={handleFiles}
@@ -224,42 +282,6 @@ export const ImportModal: React.FC = () => {
               >
                 <FileCode className="w-4 h-4" />
                 Parse & Visualize
-              </button>
-            </div>
-          )}
-
-          {method === 'azure' && (
-            <div className="space-y-3">
-              <div>
-                <label className="block text-[10.5px] font-bold mb-1 uppercase tracking-wider text-[var(--color-text-muted)]">
-                  Azure Subscription ID
-                </label>
-                <input
-                  type="text"
-                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                  value={subId}
-                  onChange={e => setSubId(e.target.value)}
-                  className="input-dark font-mono text-[12px]"
-                />
-              </div>
-              <div>
-                <label className="block text-[10.5px] font-bold mb-1 uppercase tracking-wider text-[var(--color-text-muted)]">
-                  Authentication Method
-                </label>
-                <select value={authMethod} onChange={e => setAuthMethod(e.target.value)} className="input-dark text-[12px]">
-                  <option value="service-principal">Service Principal</option>
-                  <option value="managed-identity">Managed Identity</option>
-                  <option value="cli">Azure CLI (az login)</option>
-                </select>
-              </div>
-              <div
-                className="p-2.5 rounded-[var(--radius-sm)] text-[11px] bg-[#FFF7D6] border border-[#9E6C00]/20 text-[#9E6C00] dark:bg-[#332E1B] dark:border-[#F5CD47]/20 dark:text-[#F5CD47]"
-              >
-                ⚠️ Azure subscription discovery requires backend API connectivity. Ensure the FastAPI backend is running.
-              </div>
-              <button disabled className="btn-primary w-full justify-center opacity-50">
-                <Cloud className="w-4 h-4" />
-                Connect & Discover Resources
               </button>
             </div>
           )}

@@ -214,7 +214,7 @@ export const AzureIcon: React.FC<AzureIconProps> = ({
     );
   }
 
-  if (norm.includes('vault') || norm.includes('backup') || norm.includes('recovery')) {
+  if ((norm.includes('vault') && !norm.includes('key_vault') && !norm.includes('keyvault')) || norm.includes('backup') || norm.includes('recovery')) {
     return (
       <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
         <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#vault_grad)"/>
@@ -539,6 +539,383 @@ export const AzureIcon: React.FC<AzureIconProps> = ({
     );
   }
 
+  // Container Registry (ACR)
+  if (norm.includes('container_registry') || norm.includes('acr')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#acr_grad)"/>
+        {/* Registry Cargo Container */}
+        <path d="M24 12L36 18V30L24 36L12 30V18L24 12Z" fill="#004578" stroke="#50E6FF" strokeWidth="1.5"/>
+        <path d="M24 12L36 18L24 24L12 18L24 12Z" fill="#50E6FF" fillOpacity="0.8"/>
+        <path d="M24 24V36" stroke="#50E6FF" strokeWidth="1.5"/>
+        <circle cx="24" cy="24" r="3" fill="#FFFFFF"/>
+        <rect x="18" y="27" width="4" height="5" rx="0.5" fill="#50E6FF"/>
+        <rect x="26" y="27" width="4" height="5" rx="0.5" fill="#50E6FF"/>
+        <defs>
+          <linearGradient id="acr_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#0078D4"/>
+            <stop offset="1" stopColor="#008272"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // Azure Bastion
+  if (norm.includes('bastion')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#bastion_grad)"/>
+        {/* Castle / Fortress battlement turret */}
+        <path d="M14 16H18V19H22V16H26V19H30V16H34V34H14V16Z" fill="#004578" stroke="#50E6FF" strokeWidth="1.5"/>
+        {/* Secure gate arch */}
+        <path d="M20 34V26C20 23.7909 21.7909 22 24 22C26.2091 22 28 23.7909 28 26V34H20Z" fill="#50E6FF"/>
+        <circle cx="24" cy="25" r="1.5" fill="#002447"/>
+        <defs>
+          <linearGradient id="bastion_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#0078D4"/>
+            <stop offset="1" stopColor="#002D50"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // NAT Gateway
+  if (norm.includes('nat_gateway')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#nat_grad)"/>
+        <rect x="12" y="16" width="24" height="16" rx="3" fill="#004578" stroke="#FFFFFF" strokeWidth="1.5"/>
+        {/* Dual Translation Arrows */}
+        <path d="M17 21H31M31 21L27 18M31 21L27 24" stroke="#50E6FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M31 27H17M17 27L21 24M17 27L21 30" stroke="#FFE066" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <defs>
+          <linearGradient id="nat_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#0078D4"/>
+            <stop offset="1" stopColor="#004E8C"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // Route Table
+  if (norm.includes('route_table')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#route_grad)"/>
+        {/* Network Waypoints & Paths */}
+        <circle cx="16" cy="18" r="4" fill="#FFFFFF"/>
+        <circle cx="32" cy="18" r="4" fill="#50E6FF"/>
+        <circle cx="24" cy="32" r="4" fill="#FFFFFF"/>
+        <path d="M19 18H29M18 21L22 29M30 21L26 29" stroke="#50E6FF" strokeWidth="2" strokeDasharray="2 2"/>
+        <circle cx="16" cy="18" r="1.5" fill="#004578"/>
+        <circle cx="32" cy="18" r="1.5" fill="#004578"/>
+        <circle cx="24" cy="32" r="1.5" fill="#004578"/>
+        <defs>
+          <linearGradient id="route_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#0078D4"/>
+            <stop offset="1" stopColor="#003A66"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // DNS Zone & Private DNS Zone
+  if (norm.includes('dns')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#dns_grad)"/>
+        <circle cx="24" cy="24" r="11" stroke="#FFFFFF" strokeWidth="1.5" fill="none"/>
+        <ellipse cx="24" cy="24" rx="5" ry="11" stroke="#FFFFFF" strokeWidth="1.5" fill="none"/>
+        <line x1="13" y1="24" x2="35" y2="24" stroke="#FFFFFF" strokeWidth="1.5"/>
+        {/* DNS Tag / Pointer badge */}
+        <circle cx="32" cy="16" r="4" fill="#50E6FF" stroke="#004578" strokeWidth="1"/>
+        <path d="M30 16H34M32 14V18" stroke="#004578" strokeWidth="1.5" strokeLinecap="round"/>
+        <defs>
+          <linearGradient id="dns_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#0078D4"/>
+            <stop offset="1" stopColor="#004E8C"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // Virtual Network Gateway / VPN Gateway
+  if (norm.includes('virtual_network_gateway') || norm.includes('vpn')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#vpn_grad)"/>
+        {/* Tunnel Bridge */}
+        <path d="M12 28V20C12 15 16 14 24 14C32 14 36 15 36 20V28" stroke="#FFFFFF" strokeWidth="2.5" fill="none"/>
+        <rect x="19" y="24" width="10" height="10" rx="2" fill="#50E6FF" stroke="#004578" strokeWidth="1"/>
+        <path d="M21 24V21C21 19.3431 22.3431 18 24 18C25.6569 18 27 19.3431 27 21V24" stroke="#004578" strokeWidth="1.5" fill="none"/>
+        <circle cx="24" cy="29" r="1.5" fill="#004578"/>
+        <defs>
+          <linearGradient id="vpn_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#0078D4"/>
+            <stop offset="1" stopColor="#5C2D91"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // Azure Front Door / Traffic Manager
+  if (norm.includes('frontdoor') || norm.includes('front_door') || norm.includes('traffic_manager')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#fd_grad)"/>
+        <circle cx="24" cy="24" r="12" stroke="#FFFFFF" strokeWidth="1.5" fill="none"/>
+        <path d="M12 24H36" stroke="#FFFFFF" strokeWidth="1.5"/>
+        {/* Ingress Gateway Doorway */}
+        <path d="M20 18L28 14V34L20 30V18Z" fill="#50E6FF" stroke="#004578" strokeWidth="1"/>
+        <circle cx="26" cy="24" r="1" fill="#004578"/>
+        <defs>
+          <linearGradient id="fd_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#0078D4"/>
+            <stop offset="1" stopColor="#002D50"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // Log Analytics Workspace
+  if (norm.includes('log_analytics')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#la_grad)"/>
+        {/* Telemetry Ledger */}
+        <rect x="13" y="13" width="22" height="22" rx="3" fill="#FFFFFF"/>
+        <path d="M17 19H31M17 24H27M17 29H23" stroke="#0078D4" strokeWidth="2" strokeLinecap="round"/>
+        {/* Analytics Query Lens */}
+        <circle cx="29" cy="27" r="5" fill="#50E6FF" stroke="#004578" strokeWidth="1.5"/>
+        <path d="M33 31L37 35" stroke="#004578" strokeWidth="2" strokeLinecap="round"/>
+        <defs>
+          <linearGradient id="la_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#0078D4"/>
+            <stop offset="1" stopColor="#00188F"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // Application Insights
+  if (norm.includes('application_insights') || norm.includes('app_insights')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#ai_apm_grad)"/>
+        {/* Diagnostic APM Lightbulb & ECG Pulse */}
+        <path d="M24 12C18.4772 12 14 16.4772 14 22C14 25.5 16 28.5 19 30V34H29V30C32 28.5 34 25.5 34 22C34 16.4772 29.5228 12 24 12Z" fill="#FFFFFF" fillOpacity="0.2" stroke="#FFFFFF" strokeWidth="1.5"/>
+        {/* ECG pulse wave */}
+        <path d="M16 22H21L23 17L26 27L28 22H32" stroke="#50E6FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <rect x="21" y="34" width="6" height="2" rx="1" fill="#FFFFFF"/>
+        <defs>
+          <linearGradient id="ai_apm_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#6B21A8"/>
+            <stop offset="1" stopColor="#0078D4"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // Azure Synapse Analytics & Data Explorer
+  if (norm.includes('synapse') || norm.includes('kusto')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#syn_grad)"/>
+        {/* Interlocking Analytical Vortex */}
+        <circle cx="24" cy="24" r="10" stroke="#FFFFFF" strokeWidth="2" strokeDasharray="4 2" fill="none"/>
+        <circle cx="24" cy="24" r="4" fill="#50E6FF"/>
+        <circle cx="24" cy="14" r="2.5" fill="#50E6FF"/>
+        <circle cx="34" cy="24" r="2.5" fill="#50E6FF"/>
+        <circle cx="24" cy="34" r="2.5" fill="#50E6FF"/>
+        <circle cx="14" cy="24" r="2.5" fill="#50E6FF"/>
+        <defs>
+          <linearGradient id="syn_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#0078D4"/>
+            <stop offset="1" stopColor="#5C2D91"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // Azure Data Factory
+  if (norm.includes('data_factory')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#adf_grad)"/>
+        {/* Factory pipes & pipeline */}
+        <rect x="14" y="22" width="20" height="12" rx="2" fill="#004578" stroke="#FFFFFF" strokeWidth="1.5"/>
+        <path d="M18 22V14M24 22V14M30 22V14" stroke="#50E6FF" strokeWidth="2" strokeLinecap="round"/>
+        <circle cx="24" cy="28" r="3" fill="#50E6FF"/>
+        <defs>
+          <linearGradient id="adf_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#0078D4"/>
+            <stop offset="1" stopColor="#00A3BF"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // Azure Databricks
+  if (norm.includes('databricks')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#dbx_grad)"/>
+        {/* Databricks stacked diamonds */}
+        <path d="M24 11L33 16L24 21L15 16L24 11Z" fill="#FFE066"/>
+        <path d="M15 20L24 25L33 20L33 23L24 28L15 23V20Z" fill="#FF8C00"/>
+        <path d="M15 27L24 32L33 27L33 30L24 35L15 30V27Z" fill="#D83B01"/>
+        <defs>
+          <linearGradient id="dbx_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#FF8C00"/>
+            <stop offset="1" stopColor="#B4009E"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // Event Grid
+  if (norm.includes('eventgrid') || norm.includes('event_grid')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#eg_grad)"/>
+        {/* Event Matrix Starburst */}
+        <circle cx="24" cy="24" r="5" fill="#50E6FF"/>
+        <circle cx="15" cy="15" r="3" fill="#FFFFFF"/>
+        <circle cx="33" cy="15" r="3" fill="#FFFFFF"/>
+        <circle cx="15" cy="33" r="3" fill="#FFFFFF"/>
+        <circle cx="33" cy="33" r="3" fill="#FFFFFF"/>
+        <line x1="17" y1="17" x2="21" y2="21" stroke="#FFFFFF" strokeWidth="2"/>
+        <line x1="31" y1="17" x2="27" y2="21" stroke="#FFFFFF" strokeWidth="2"/>
+        <line x1="17" y1="31" x2="21" y2="27" stroke="#FFFFFF" strokeWidth="2"/>
+        <line x1="31" y1="31" x2="27" y2="27" stroke="#FFFFFF" strokeWidth="2"/>
+        <defs>
+          <linearGradient id="eg_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#5C2D91"/>
+            <stop offset="1" stopColor="#0078D4"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // SignalR Service
+  if (norm.includes('signalr')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#sig_grad)"/>
+        <circle cx="24" cy="28" r="4" fill="#50E6FF"/>
+        <path d="M17 21C20.866 17.134 27.134 17.134 31 21" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" fill="none"/>
+        <path d="M13 17C19.0751 10.9249 28.9249 10.9249 35 17" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" fill="none"/>
+        <defs>
+          <linearGradient id="sig_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#0078D4"/>
+            <stop offset="1" stopColor="#008272"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // Search Service (Azure AI Search)
+  if (norm.includes('search')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#srch_grad)"/>
+        {/* Search Lens over AI nodes */}
+        <circle cx="22" cy="22" r="9" stroke="#FFFFFF" strokeWidth="2.5" fill="#004578" fillOpacity="0.4"/>
+        <path d="M29 29L36 36" stroke="#50E6FF" strokeWidth="3" strokeLinecap="round"/>
+        <circle cx="22" cy="22" r="3" fill="#EC4899"/>
+        <defs>
+          <linearGradient id="srch_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#0078D4"/>
+            <stop offset="1" stopColor="#E3008C"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // Microsoft Sentinel
+  if (norm.includes('sentinel')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#sen_grad)"/>
+        <path d="M24 11L35 15V24C35 30.5 29.5 35.5 24 37C18.5 35.5 13 30.5 13 24V15L24 11Z" fill="#002447" stroke="#50E6FF" strokeWidth="2"/>
+        <circle cx="24" cy="24" r="6" stroke="#FFFFFF" strokeWidth="1.5" fill="none"/>
+        <circle cx="24" cy="24" r="2.5" fill="#EC4899"/>
+        <defs>
+          <linearGradient id="sen_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#002050"/>
+            <stop offset="1" stopColor="#0078D4"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // WAF Policy
+  if (norm.includes('waf') || norm.includes('web_application_firewall')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#waf_grad)"/>
+        <path d="M24 12L34 16V25C34 30.5 29.5 34.5 24 36C18.5 34.5 14 30.5 14 25V16L24 12Z" fill="#A80000" stroke="#FFE066" strokeWidth="1.5"/>
+        <path d="M21 21L18 24L21 27" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M27 21L30 24L27 27" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <defs>
+          <linearGradient id="waf_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#E81123"/>
+            <stop offset="1" stopColor="#8661C5"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  // VM Scale Set (VMSS)
+  if (norm.includes('scale_set') || norm.includes('vmss')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="url(#vmss_grad)"/>
+        {/* Layered VM blocks */}
+        <rect x="18" y="12" width="18" height="14" rx="2" fill="#004578" stroke="#FFFFFF" strokeWidth="1"/>
+        <rect x="15" y="16" width="18" height="14" rx="2" fill="#005BA1" stroke="#FFFFFF" strokeWidth="1"/>
+        <rect x="12" y="20" width="18" height="14" rx="2" fill="#0078D4" stroke="#50E6FF" strokeWidth="1.5"/>
+        <circle cx="17" cy="27" r="1.5" fill="#50E6FF"/>
+        <circle cx="22" cy="27" r="1.5" fill="#50E6FF"/>
+        <defs>
+          <linearGradient id="vmss_grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#0078D4"/>
+            <stop offset="1" stopColor="#003A66"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+
+  if (norm.includes('terraform') || norm.includes('hcl')) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+        <rect x="6" y="6" width="36" height="36" rx="6" fill="#1c1917" />
+        <polygon points="15,12 22.5,16.3 22.5,25 15,20.7" fill="#a7e68f" />
+        <polygon points="24,17.2 31.5,21.5 31.5,30.2 24,25.9" fill="#5c4ee5" />
+        <polygon points="33,12 33,20.7 25.5,16.3" fill="#7b6ef6" />
+        <polygon points="24,27.3 31.5,31.6 31.5,39.5 24,35.2" fill="#5c4ee5" fillOpacity="0.85" />
+      </svg>
+    );
+  }
+
   // Default Azure Generic Cloud Resource Icon
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
@@ -564,12 +941,103 @@ export const getAzureColor = (type: string): string => {
   if (norm.includes('web_app') || norm.includes('app_service')) return '#0078D4';
   if (norm.includes('function')) return '#F59E0B';
   if (norm.includes('aks') || norm.includes('kubernetes')) return '#326CE5';
+  if (norm.includes('container_registry') || norm.includes('acr')) return '#0284C7';
   if (norm.includes('storage') || norm.includes('blob')) return '#107C41';
   if (norm.includes('sql') || norm.includes('postgres') || norm.includes('database')) return '#0078D4';
   if (norm.includes('cosmos')) return '#8661C5';
+  if (norm.includes('redis')) return '#DC2626';
   if (norm.includes('key_vault')) return '#F59E0B';
   if (norm.includes('firewall')) return '#EF4444';
-  if (norm.includes('cognitive') || norm.includes('openai') || norm.includes('ai')) return '#EC4899';
-  if (norm.includes('servicebus') || norm.includes('eventhub')) return '#06B6D4';
+  if (norm.includes('bastion')) return '#2563EB';
+  if (norm.includes('cognitive') || norm.includes('openai') || norm.includes('ai') || norm.includes('search')) return '#EC4899';
+  if (norm.includes('servicebus') || norm.includes('eventhub') || norm.includes('eventgrid')) return '#06B6D4';
+  if (norm.includes('log_analytics') || norm.includes('application_insights')) return '#8B5CF6';
+  if (norm.includes('databricks')) return '#EA580C';
+  if (norm.includes('synapse') || norm.includes('data_factory')) return '#0D9488';
+  if (norm.includes('sentinel')) return '#1E40AF';
   return '#0078D4';
+};
+
+const FRIENDLY_NAMES: Record<string, string> = {
+  azurerm_resource_group: 'Resource Group',
+  azurerm_virtual_network: 'Virtual Network',
+  azurerm_subnet: 'Subnet',
+  azurerm_container_registry: 'Container Registry',
+  azurerm_linux_virtual_machine: 'Linux VM',
+  azurerm_windows_virtual_machine: 'Windows VM',
+  azurerm_linux_virtual_machine_scale_set: 'VM Scale Set',
+  azurerm_service_plan: 'App Service Plan',
+  azurerm_linux_web_app: 'Web App',
+  azurerm_windows_web_app: 'Web App (Windows)',
+  azurerm_linux_function_app: 'Function App',
+  azurerm_windows_function_app: 'Function App (Windows)',
+  azurerm_kubernetes_cluster: 'AKS Cluster',
+  azurerm_container_app: 'Container App',
+  azurerm_container_app_environment: 'Container App Env',
+  azurerm_container_group: 'Container Instance',
+  azurerm_batch_account: 'Batch Account',
+  azurerm_firewall: 'Azure Firewall',
+  azurerm_firewall_policy: 'Firewall Policy',
+  azurerm_application_gateway: 'Application Gateway',
+  azurerm_lb: 'Load Balancer',
+  azurerm_public_ip: 'Public IP',
+  azurerm_nat_gateway: 'NAT Gateway',
+  azurerm_network_security_group: 'Security Group',
+  azurerm_route_table: 'Route Table',
+  azurerm_virtual_network_peering: 'VNet Peering',
+  azurerm_private_endpoint: 'Private Endpoint',
+  azurerm_private_dns_zone: 'Private DNS Zone',
+  azurerm_dns_zone: 'Azure DNS Zone',
+  azurerm_virtual_network_gateway: 'VPN Gateway',
+  azurerm_bastion_host: 'Azure Bastion',
+  azurerm_frontdoor: 'Azure Front Door',
+  azurerm_traffic_manager_profile: 'Traffic Manager',
+  azurerm_storage_account: 'Storage Account',
+  azurerm_storage_container: 'Blob Container',
+  azurerm_storage_share: 'File Share',
+  azurerm_backup_vault: 'Backup Vault',
+  azurerm_recovery_services_vault: 'Recovery Vault',
+  azurerm_netapp_account: 'NetApp Files',
+  azurerm_redis_cache: 'Redis Cache',
+  azurerm_redis_enterprise_cluster: 'Redis Enterprise',
+  azurerm_mssql_server: 'Azure SQL Server',
+  azurerm_mssql_database: 'Azure SQL Database',
+  azurerm_cosmosdb_account: 'Cosmos DB',
+  azurerm_postgresql_flexible_server: 'PostgreSQL Server',
+  azurerm_mysql_flexible_server: 'MySQL Server',
+  azurerm_synapse_workspace: 'Synapse Analytics',
+  azurerm_kusto_cluster: 'Data Explorer',
+  azurerm_key_vault: 'Key Vault',
+  azurerm_key_vault_secret: 'Key Vault Secret',
+  azurerm_user_assigned_identity: 'Managed Identity',
+  azurerm_role_assignment: 'RBAC Role',
+  azurerm_sentinel_log_analytics_workspace_onboarding: 'Microsoft Sentinel',
+  azurerm_web_application_firewall_policy: 'WAF Policy',
+  azurerm_cognitive_account: 'Azure OpenAI',
+  azurerm_machine_learning_workspace: 'Machine Learning',
+  azurerm_search_service: 'AI Search',
+  azurerm_bot_channels_registration: 'Bot Service',
+  azurerm_servicebus_namespace: 'Service Bus',
+  azurerm_servicebus_queue: 'Service Bus Queue',
+  azurerm_servicebus_topic: 'Service Bus Topic',
+  azurerm_eventhub_namespace: 'Event Hubs',
+  azurerm_eventgrid_topic: 'Event Grid',
+  azurerm_logic_app_workflow: 'Logic App',
+  azurerm_api_management: 'API Management',
+  azurerm_signalr_service: 'SignalR Service',
+  azurerm_data_factory: 'Data Factory',
+  azurerm_databricks_workspace: 'Databricks',
+  azurerm_log_analytics_workspace: 'Log Analytics',
+  azurerm_application_insights: 'App Insights',
+  azurerm_monitor_action_group: 'Action Group',
+};
+
+export const getFriendlyTypeName = (type: string = ''): string => {
+  const clean = type.toLowerCase().trim();
+  if (FRIENDLY_NAMES[clean]) return FRIENDLY_NAMES[clean];
+  const withoutPrefix = clean.replace(/^azurerm_/, '').replace(/^microsoft\.[^/]+\//, '');
+  return withoutPrefix
+    .split('_')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
 };
