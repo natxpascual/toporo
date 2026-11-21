@@ -2,6 +2,8 @@
  * Authentication, Subscription Lifecycle & Admin Portal API Client.
  */
 
+import { apiUrl } from './config';
+
 export type UserRole = 'user' | 'admin';
 export type UserStatus = 'pending_verification' | 'pending_password' | 'active' | 'suspended';
 export type PlanTier = 'free' | 'pro';
@@ -93,7 +95,7 @@ export const AuthApi = {
     expiresInMinutes: number;
     devOtpHint?: string;
   }> {
-    const res = await fetch('/api/auth/signup', {
+    const res = await fetch(apiUrl('/api/auth/signup'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -103,7 +105,7 @@ export const AuthApi = {
   },
 
   async resendOtp(email: string): Promise<{ status: string; message: string; devOtpHint?: string }> {
-    const res = await fetch('/api/auth/resend-otp', {
+    const res = await fetch(apiUrl('/api/auth/resend-otp'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -122,7 +124,7 @@ export const AuthApi = {
     user?: AuthUser;
     message?: string;
   }> {
-    const res = await fetch('/api/auth/verify-email', {
+    const res = await fetch(apiUrl('/api/auth/verify-email'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, otpCode }),
@@ -143,7 +145,7 @@ export const AuthApi = {
     elevated: boolean;
     user: AuthUser;
   }> {
-    const res = await fetch('/api/auth/setup-password', {
+    const res = await fetch(apiUrl('/api/auth/setup-password'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -163,7 +165,7 @@ export const AuthApi = {
     elevated: boolean;
     user: AuthUser;
   }> {
-    const res = await fetch('/api/auth/login', {
+    const res = await fetch(apiUrl('/api/auth/login'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -173,7 +175,7 @@ export const AuthApi = {
   },
 
   async getMe(token?: string | null): Promise<{ user: AuthUser; elevated: boolean }> {
-    const res = await fetch('/api/auth/me', {
+    const res = await fetch(apiUrl('/api/auth/me'), {
       headers: { ...getAuthHeaders(token) },
     });
     if (!res.ok) await parseError(res, 'Session expired');
@@ -181,7 +183,7 @@ export const AuthApi = {
   },
 
   async startSevenDayTrial(): Promise<{ message: string; user: AuthUser }> {
-    const res = await fetch('/api/auth/trial/start', {
+    const res = await fetch(apiUrl('/api/auth/trial/start'), {
       method: 'POST',
       headers: { ...getAuthHeaders() },
     });
@@ -190,7 +192,7 @@ export const AuthApi = {
   },
 
   async upgradeToPro(): Promise<{ message: string; user: AuthUser }> {
-    const res = await fetch('/api/auth/upgrade', {
+    const res = await fetch(apiUrl('/api/auth/upgrade'), {
       method: 'POST',
       headers: { ...getAuthHeaders() },
     });
@@ -206,7 +208,7 @@ export const AdminApi = {
     users: AuthUser[];
     auditEvents: AuditEvent[];
   }> {
-    const res = await fetch('/api/admin/users', {
+    const res = await fetch(apiUrl('/api/admin/users'), {
       headers: { ...getAuthHeaders() },
     });
     if (!res.ok) await parseError(res, 'Failed to load admin portal data');
@@ -224,7 +226,7 @@ export const AdminApi = {
       fullName?: string;
     }
   ): Promise<{ user: AuthUser }> {
-    const res = await fetch(`/api/admin/users/${encodeURIComponent(email)}`, {
+    const res = await fetch(apiUrl(`/api/admin/users/${encodeURIComponent(email)}`), {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -237,7 +239,7 @@ export const AdminApi = {
   },
 
   async deleteUser(email: string): Promise<{ deleted: boolean; email: string }> {
-    const res = await fetch(`/api/admin/users/${encodeURIComponent(email)}`, {
+    const res = await fetch(apiUrl(`/api/admin/users/${encodeURIComponent(email)}`), {
       method: 'DELETE',
       headers: { ...getAuthHeaders() },
     });

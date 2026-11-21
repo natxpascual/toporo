@@ -3,6 +3,7 @@ import { Eye, EyeOff, ArrowLeft, AlertCircle, CheckCircle2, Mail, ShieldCheck, K
 import { ToporoLogo } from '../icons/ToporoLogo';
 import { AuthApi } from '../../services/authApi';
 import { useAuthStore } from '../../store/useAuthStore';
+import { apiUrl } from '../../services/config';
 
 interface SignupPageProps {
   onNavigate: (route: string) => void;
@@ -199,7 +200,7 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate, onSuccess })
 
   const handleSso = (provider: 'google' | 'github') => {
     setIsLoading(true);
-    window.location.href = `/api/auth/oauth/${provider}/authorize`;
+    window.location.href = apiUrl(`/api/auth/oauth/${provider}/authorize`);
   };
 
   return (

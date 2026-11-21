@@ -60,8 +60,9 @@ export interface CatalogItem {
 }
 
 import { getAuthHeaders } from './authApi';
+import { apiUrl } from './config';
 
-const API_BASE = '/api';
+const API_BASE = apiUrl('/api');
 
 export const ApiService = {
   async getCatalog(): Promise<CatalogItem[]> {

@@ -10,16 +10,29 @@ variable "location" {
   default     = "eastus"
 }
 
-variable "app_service_sku" {
-  type        = string
-  description = "App Service Plan SKU for frontend web app hosting (B1 is cost-optimized for small teams)"
-  default     = "B1"
-}
-
 variable "acr_sku" {
   type        = string
   description = "Azure Container Registry SKU (Basic is cost-optimized for small teams)"
   default     = "Basic"
+}
+
+variable "api_image_tag" {
+  type        = string
+  description = "Docker image tag for the FastAPI backend in ACR"
+  default     = "latest"
+}
+
+variable "frontend_base_url" {
+  type        = string
+  description = "Cloudflare Pages URL for OAuth callback redirects"
+  default     = "http://localhost:3000"
+}
+
+variable "jwt_secret_key" {
+  type        = string
+  description = "Production JWT signing secret (64+ char random hex)"
+  sensitive   = true
+  default     = "replace-with-strong-64-char-random-hex-before-production"
 }
 
 variable "tags" {

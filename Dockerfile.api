@@ -1,4 +1,4 @@
-# Multi-stage Docker container for Azure Functions / FastAPI Backend
+# Multi-stage Docker container for FastAPI Backend (Azure Container Apps)
 FROM python:3.14-slim AS builder
 
 WORKDIR /app
@@ -8,8 +8,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml .
+COPY src/ ./src/
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir fastapi uvicorn pydantic python-hcl2 jinja2 networkx httpx openai
+    && pip install --no-cache-dir .
 
 FROM python:3.14-slim AS runner
 
@@ -26,4 +27,4 @@ ENV PORT=8000
 
 EXPOSE 8000
 
-CMD ["python", "-m", "src.main", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "python -m src.main --host 0.0.0.0 --port ${PORT:-8000}"]

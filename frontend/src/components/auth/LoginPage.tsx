@@ -3,6 +3,7 @@ import { Eye, EyeOff, ArrowLeft, AlertCircle, ShieldAlert, ShieldCheck } from 'l
 import { ToporoLogo } from '../icons/ToporoLogo';
 import { AuthApi } from '../../services/authApi';
 import { useAuthStore } from '../../store/useAuthStore';
+import { apiUrl } from '../../services/config';
 
 interface LoginPageProps {
   onNavigate: (route: string) => void;
@@ -124,7 +125,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onSuccess }) =
   const handleSso = (provider: 'google' | 'github') => {
     setIsLoading(true);
     const suffix = isElevateMode ? '?elevate=true' : '';
-    window.location.href = `/api/auth/oauth/${provider}/authorize${suffix}`;
+    window.location.href = apiUrl(`/api/auth/oauth/${provider}/authorize${suffix}`);
   };
 
   return (
